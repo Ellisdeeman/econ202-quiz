@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="econ202-build" content="v2-progress-tracking">
+<meta name="econ202-build" content="v3-spaced-exam-reasoning">
 <title>ECON 202 Quiz — Ch 1, 2, 3, 6</title>
 <style>
 :root{--bg:#f5f7fb;--card:#fff;--ink:#1f2937;--muted:#6b7280;--line:#e5e7eb;--accent:#2563eb;--accent-soft:#eff4ff;--ok:#15803d;--ok-bg:#ecfdf3;--bad:#b91c1c;--bad-bg:#fef2f2;--warn:#b45309;--radius:14px}
@@ -29,7 +29,7 @@ h3{margin:22px 0 8px;font-size:1.05rem}
 .count{font-weight:600;margin:0 0 16px}
 .btns{display:flex;flex-wrap:wrap;gap:10px}
 button{font:inherit;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--ink);padding:10px 16px;cursor:pointer;transition:background .15s,border-color .15s}
-button:hover:not(:disabled):not(.correct):not(.wrong){border-color:#c7d2fe;background:#f8faff}
+button:hover:not(:disabled):not(.correct):not(.wrong):not(.picked){border-color:#c7d2fe;background:#f8faff}
 button.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
 button.primary:hover:not(:disabled){background:#1d4ed8}
 button.danger{color:var(--bad);border-color:#fecaca}
@@ -50,7 +50,8 @@ button.link{border:none;background:none;color:var(--muted);padding:6px 4px;text-
 .opt.wrong{border-color:var(--bad);background:var(--bad-bg)}
 .opt.wrong .key{background:var(--bad);color:#fff}
 .opts.locked .opt{cursor:default}
-.opts.locked .opt:not(.correct):not(.wrong){opacity:.6}
+.opts.locked .opt:hover:not(.correct):not(.wrong):not(.picked){background:#fff;border-color:var(--line)}
+.opts.locked .opt:not(.correct):not(.wrong):not(.picked){opacity:.6}
 .feedback{margin-top:16px;border-radius:10px;padding:12px 14px;border-left:4px solid}
 .feedback.ok{background:var(--ok-bg);border-color:var(--ok)}
 .feedback.bad{background:var(--bad-bg);border-color:var(--bad)}
@@ -94,6 +95,35 @@ textarea{width:100%;min-height:90px;font:12px/1.4 ui-monospace,monospace;border:
 .panel{border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:12px;background:#fbfcfe}
 .msg{font-size:.9rem;margin-top:8px}
 .msg.ok{color:var(--ok)}.msg.bad{color:var(--bad)}
+
+.divider{border:none;border-top:1px solid var(--line);margin:22px 0 16px}
+.examset{display:flex;flex-wrap:wrap;gap:14px 20px;align-items:center;margin:8px 0 14px}
+.examset label{display:flex;align-items:center;gap:8px;font-size:.95rem}
+select,input[type=number]{font:inherit;border:1px solid var(--line);border-radius:8px;padding:6px 8px;background:#fff}
+input[type=number]{width:80px}
+.opt.picked{border-color:var(--accent);background:var(--accent-soft)}
+.opt.picked .key{background:var(--accent);color:#fff}
+.reason{margin-top:16px;border:1px dashed #c7d2fe;border-radius:12px;padding:12px 14px;background:#fafbff}
+.reason h4{margin:0 0 8px;font-size:.95rem}
+.reason .opt{font-size:.93rem;padding:9px 12px}
+.reason .opt.guess{color:var(--muted);font-style:italic}
+.tag.shaky,.feedback.shaky{color:var(--warn)}
+.feedback.shaky{background:#fffbeb;border-color:#f59e0b;color:var(--ink)}
+.dot.s{background:#f59e0b}
+.timer{font:700 1rem ui-monospace,monospace;padding:4px 10px;border-radius:8px;background:var(--accent-soft);color:var(--accent)}
+.timer.low{background:var(--bad-bg);color:var(--bad)}
+.nav{display:grid;grid-template-columns:repeat(auto-fill,minmax(34px,1fr));gap:6px;margin:4px 0 16px}
+.nav button{padding:5px 0;font-size:.82rem;border-radius:8px;position:relative}
+.nav button.ans{background:#e0e7ff;border-color:#c7d2fe}
+.nav button.cur{outline:2px solid var(--accent);outline-offset:1px;font-weight:700}
+.nav button.flag::after{content:"";position:absolute;top:-3px;right:-3px;width:9px;height:9px;border-radius:50%;background:#f59e0b;border:1.5px solid #fff}
+.examrow{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:18px;flex-wrap:wrap}
+button.flagged{background:#fffbeb;border-color:#f59e0b;color:var(--warn)}
+.review li.right{border-left:4px solid var(--ok)}
+.review li.wrongq{border-left:4px solid var(--bad)}
+.legend{display:flex;gap:16px;font-size:.8rem;color:var(--muted);margin:6px 0 0}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.notice{background:#fff7ed;color:var(--warn);border-radius:10px;padding:8px 12px;font-size:.9rem;margin:8px 0}
 @media (max-width:520px){.card{padding:16px}.prompt{font-size:1.05rem}.big{font-size:2.4rem}.hint{display:none}.tile .v{font-size:1.3rem}}
 </style>
 </head>
@@ -111,38 +141,69 @@ textarea{width:100%;min-height:90px;font:12px/1.4 ui-monospace,monospace;border:
   <div class="toggles">
     <label><input type="checkbox" id="shuffleQ" checked> Shuffle questions</label>
     <label><input type="checkbox" id="shuffleO" checked> Shuffle answer options</label>
+    <label title="After you pick an answer, choose why before it's revealed"><input type="checkbox" id="reasonToggle" checked> “Explain your reasoning” step</label>
   </div>
   <p class="count" id="qCount"></p>
   <div class="btns">
     <button class="primary" id="startBtn">Start quiz</button>
+    <button id="reviewBtn">Review due</button>
     <button id="hardBtn">Hardest questions</button>
     <button id="statsBtn">My Stats</button>
   </div>
   <div class="statnote" id="statNote"></div>
+  <hr class="divider">
+  <h2 style="font-size:1.1rem">Exam mode</h2>
+  <div class="muted" style="font-size:.9rem">Timed, no feedback until you submit. Move freely between questions, change answers, and flag ones to revisit.</div>
+  <div class="examset">
+    <label>Questions <select id="examCount"></select></label>
+    <label>Time limit <input type="number" id="examMinutes" min="1" max="240" step="1"> min</label>
+    <label><input type="checkbox" id="examUntimed"> Untimed</label>
+  </div>
+  <button class="primary" id="examBtn">Start exam</button>
 </section>
 
-<!-- QUIZ -->
+<!-- QUIZ (drill modes) -->
 <section id="quiz" class="card hidden">
   <div class="topbar"><span id="qPos"></span><span id="scoreLive"></span></div>
   <div class="progress"><div id="progBar"></div></div>
   <div id="qTags"></div>
   <p class="prompt" id="qPrompt"></p>
   <div class="opts" id="qOpts"></div>
+  <div class="reason hidden" id="qReason">
+    <h4>Why? <span class="muted" style="font-weight:400">— pick the reasoning behind your answer</span></h4>
+    <div class="opts" id="qReasonOpts"></div>
+  </div>
   <div class="feedback hidden" id="qFeedback"></div>
   <div class="nextrow">
     <button class="link" id="quitBtn">End quiz</button>
-    <span class="hint"><kbd>1</kbd>–<kbd>4</kbd> or <kbd>A</kbd>–<kbd>D</kbd> to answer · <kbd>Enter</kbd> next</span>
+    <span class="hint" id="qHint"></span>
     <button class="primary" id="nextBtn" disabled>Next</button>
   </div>
 </section>
 
-<!-- END -->
+<!-- EXAM -->
+<section id="exam" class="card hidden">
+  <div class="topbar"><span id="exPos"></span><span class="timer" id="exTimer"></span></div>
+  <div class="nav" id="exNav"></div>
+  <div id="exTags"></div>
+  <p class="prompt" id="exPrompt"></p>
+  <div class="opts" id="exOpts"></div>
+  <div class="examrow">
+    <div class="btns"><button id="exPrev">← Prev</button><button id="exFlag">⚑ Flag</button><button id="exNext">Next →</button></div>
+    <button class="primary" id="exSubmit">Submit exam</button>
+  </div>
+  <div class="hint" style="margin-top:10px"><kbd>1</kbd>–<kbd>4</kbd>/<kbd>A</kbd>–<kbd>D</kbd> answer · <kbd>←</kbd><kbd>→</kbd> move · <kbd>F</kbd> flag</div>
+</section>
+
+<!-- END (drill) -->
 <section id="end" class="card hidden">
-  <h2>Results</h2>
+  <h2 id="endTitle">Results</h2>
+  <div id="endNotice"></div>
   <div class="big" id="finalPct"></div>
   <div class="muted" id="finalRaw"></div>
   <table class="breakdown" id="chapTable"></table>
-  <div id="missedWrap"><h3 style="margin:0">Missed questions</h3><ul class="missed" id="missedList"></ul></div>
+  <div id="missedWrap"><h3 style="margin:0" id="missedTitle">Missed questions</h3><ul class="missed" id="missedList"></ul></div>
+  <div id="shakyWrap"><h3 style="margin:0">Shaky — right answer, weak reasoning</h3><ul class="missed" id="shakyList"></ul></div>
   <div class="btns">
     <button class="primary" id="retryBtn">Retry missed only</button>
     <button id="restartBtn">Restart</button>
@@ -162,7 +223,7 @@ textarea{width:100%;min-height:90px;font:12px/1.4 ui-monospace,monospace;border:
   <h3>Session scores</h3>
   <div id="chartWrap"></div>
   <h3>Hardest questions</h3>
-  <div class="muted" style="font-size:.85rem">Ranked by difficulty (recent results weigh more than lifetime accuracy). Mastered = 3 correct in a row.</div>
+  <div class="muted" style="font-size:.85rem">Ranked by difficulty (recent results weigh more; shaky corrects count as half). Mastered = 3 truly-correct in a row.</div>
   <ol class="hard" id="hardList"></ol>
   <h3>Backup &amp; sync</h3>
   <div class="muted" style="font-size:.85rem">Progress is saved automatically in this browser. Use export/import to back up or move it to another device.</div>
@@ -189,53 +250,50 @@ textarea{width:100%;min-height:90px;font:12px/1.4 ui-monospace,monospace;border:
 
 <script type="application/json" id="quiz-data">
 [
-{"id":"1-1","chapter":1,"prompt":"If a firm like Sony produces too few earbuds, what does this suggest?","options":["Rational choice cannot be applied to this decision","Marginal cost exceeds marginal benefit at the current output","Government should intervene in the earbud market","Marginal benefit exceeds marginal cost at the current output"],"answer":3,"explanation":"Producing \"too few\" means that at the current quantity MB is still greater than MC, so producing more units would add net benefit until MB = MC."},
-{"id":"1-2","chapter":1,"prompt":"How does a fast-food restaurant illustrate that people respond to incentives?","options":["Customers select the shortest line","Menu prices are posted above the counter","Employees wear matching uniforms","The restaurant stays open late at night"],"answer":0,"explanation":"Choosing the shortest line reduces the cost (waiting time) of getting food; people change behavior in response to changes in costs and benefits."},
-{"id":"1-3","chapter":1,"prompt":"Why do people rarely buy a second copy of the same inexpensive newspaper?","options":["The marginal benefit of a second paper exceeds its marginal cost","The marginal benefit of a second paper is less than its marginal cost","Newspapers are not scarce goods","People do not behave rationally when buying cheap items"],"answer":1,"explanation":"A second identical paper adds almost no extra benefit, so its MB falls below its price (MC); rational buyers stop at one."},
-{"id":"1-4","chapter":1,"prompt":"What does the term \"ceteris paribus\" mean?","options":["Let the buyer beware","Other things equal","The economy is at full employment","All resources are scarce"],"answer":1,"explanation":"Ceteris paribus (\"other things equal\") means holding all other relevant factors constant while examining the effect of one variable."},
-{"id":"1-5","chapter":1,"prompt":"Economic models (such as those in microeconomics) are commonly used for what purpose?","options":["Describing every detail of the real economy exactly","Replacing the need for real-world data","Deciding which policies are morally right","Analyzing the behavior of a typical or average consumer or firm"],"answer":3,"explanation":"Models simplify reality to explain and predict how a typical (representative) consumer or firm behaves and responds to changes."},
-{"id":"1-6","chapter":1,"prompt":"Jamal can study, work, or play basketball tonight, and he chooses to study. What is his opportunity cost?","options":["Working and playing basketball combined","Zero, because studying is a productive activity","It cannot be determined without knowing which activity was his next-best alternative","The tuition he pays for his classes"],"answer":2,"explanation":"Opportunity cost is the value of the single next-best alternative forgone, not all alternatives combined, so we must know which option Jamal ranked second."},
-{"id":"1-7","chapter":1,"prompt":"What is a consequence of scarcity?","options":["Individuals have to make choices from among alternatives","All goods eventually become free","Wants are eventually fully satisfied","Prices always fall over time"],"answer":0,"explanation":"Because resources are limited relative to wants, individuals and societies must choose among alternatives, and every choice has an opportunity cost."},
-{"id":"1-8","chapter":1,"prompt":"When economists construct models, what do they do?","options":["Include every real-world detail","Avoid making any assumptions","Rely only on normative value judgments","Make simplifying assumptions"],"answer":3,"explanation":"Models are simplifications: economists deliberately abstract from irrelevant details (e.g., using ceteris paribus) to focus on key relationships."},
-{"id":"1-9","chapter":1,"prompt":"What is the basic economic problem?","options":["Inflation","Scarcity","Government debt","Unemployment"],"answer":1,"explanation":"Economics exists because of scarcity: unlimited wants confront limited resources, forcing choices."},
-{"id":"1-10","chapter":1,"prompt":"What causes a parallel inward shift of a consumer's budget line?","options":["An increase in income","A decrease in the price of one of the goods","A decrease in income","A change in the consumer's preferences"],"answer":2,"explanation":"Lower income with unchanged prices shifts the budget line inward in parallel; a change in one good's price would pivot (rotate) the line instead."},
-{"id":"1-11","chapter":1,"prompt":"Why does scarcity persist?","options":["Available resources exceed economic wants","Governments restrict production","The money supply is limited","Economic wants exceed available resources"],"answer":3,"explanation":"Human wants are essentially unlimited while resources are limited, so scarcity never disappears."},
-{"id":"1-12","chapter":1,"prompt":"Momo chooses to attend class. What does that choice imply?","options":["The marginal costs of attending outweigh the marginal benefits","Attending class has no opportunity cost","The marginal benefits of attending outweigh the marginal costs","Momo is not acting rationally"],"answer":2,"explanation":"Rational decision makers take an action when its marginal benefit is at least as great as its marginal cost."},
-{"id":"1-13","chapter":1,"prompt":"Which of the following is a normative statement?","options":["The nation's trade deficit increased last year","The worsening balance of trade must be corrected if this nation is to remain competitive","Higher tariffs tend to raise the prices of imported goods","The unemployment rate was 4 percent in March"],"answer":1,"explanation":"Normative statements express value judgments about what ought to be (\"must be corrected\"); the others are positive, testable statements of fact."},
-{"id":"1-14","chapter":1,"prompt":"Emma gets in line at In-N-Out and then leaves before ordering. What does that imply?","options":["The marginal benefit of eating at In-N-Out exceeds the marginal cost of waiting","Emma is behaving irrationally","Waiting in line has no cost","The marginal cost of waiting is greater than the marginal benefit of eating at In-N-Out"],"answer":3,"explanation":"Leaving the line shows that, at the margin, the cost of continuing to wait exceeded the benefit she expected from the meal."},
-{"id":"1-15","chapter":1,"prompt":"What can be said about a combination of goods that lies outside (beyond) a consumer's budget line?","options":["It is unattainable with current income and prices","It is attainable with money left over","It is attainable only by spending all income","It is the consumer's most preferred affordable combination"],"answer":0,"explanation":"Points beyond the budget line cost more than the consumer's income at current prices, so they cannot be purchased."},
-
-{"id":"2-1","chapter":2,"prompt":"What does specialization permit?","options":["Each person to become fully self-sufficient","The production of a larger output with fixed amounts of resources","The elimination of all trade among individuals","Production to take place without any resources"],"answer":1,"explanation":"By letting people and regions focus on what they do best (and gain skill), specialization increases total output from the same resources."},
-{"id":"2-2","chapter":2,"prompt":"In the Soviet Union and pre-reform China, what resulted from central planners' emphasis on quantity targets?","options":["Product quality and variety were neglected","Luxury goods were overproduced","Firms innovated too rapidly","Consumer sovereignty guided production"],"answer":0,"explanation":"Managers were rewarded for meeting output quotas, so they sacrificed quality and variety to hit the numbers."},
-{"id":"2-3","chapter":2,"prompt":"If an industry is neither expanding nor contracting, what are economic profits in that industry?","options":["Large and positive","Negative (economic losses)","Zero","Impossible to determine"],"answer":2,"explanation":"Economic profits attract entry and losses cause exit; with zero economic profit (normal profit only) there is no incentive to enter or leave."},
-{"id":"2-4","chapter":2,"prompt":"A firm can produce a good that sells for $40 at a least-cost of $30 per unit. What will happen?","options":["It will earn $30 of economic profit and may use any technique","It will earn $70 of economic profit","It will suffer a $10 economic loss","It will realize $10 of economic profit and use the least-cost technique"],"answer":3,"explanation":"Economic profit = price − cost = $40 − $30 = $10; competition and the profit motive push firms to use the least-cost production technique."},
-{"id":"2-5","chapter":2,"prompt":"What do clearly defined and enforced property rights encourage?","options":["Theft and free-riding","Investment, maintenance, and mutually agreeable trades","Central planning of production","Firms to avoid long-term investment"],"answer":1,"explanation":"When people can keep the returns from their property, they invest in and maintain it and can trade it voluntarily."},
-{"id":"2-6","chapter":2,"prompt":"Which country is the best example of a market economy?","options":["North Korea","Cuba","The former Soviet Union","Singapore"],"answer":3,"explanation":"Singapore relies heavily on private property and markets, whereas North Korea, Cuba, and the Soviet Union are/were command economies."},
-{"id":"2-7","chapter":2,"prompt":"In a market system, why are producers free to enter or leave an industry?","options":["They follow their own self-interest in search of profit","The government assigns each firm to an industry","Central planners require them to move","Consumers vote on which firms may operate"],"answer":0,"explanation":"Freedom of enterprise plus self-interest means firms move resources toward industries with profits and away from those with losses."},
-{"id":"2-8","chapter":2,"prompt":"Why did centrally planned economies tend to lag in innovation?","options":["Too much competition among firms","Excessive profit incentives for managers","There was little personal gain from innovating or fixing shortages","Consumers demanded too many new products"],"answer":2,"explanation":"Without profits or private ownership, managers and workers captured little reward from new products or better methods, so innovation stagnated."},
-{"id":"2-9","chapter":2,"prompt":"In the circular flow model, what does the money flow from businesses through the resource market (to households) represent?","options":["Consumer expenditures on goods and services","Wage, rent, interest, and profit income","Finished goods and services","Tax payments to government"],"answer":1,"explanation":"Businesses buy resources from households, paying them income in the form of wages, rent, interest, and profits."},
-{"id":"2-10","chapter":2,"prompt":"What was a key incentive problem under central planning?","options":["Firms competed too aggressively on price","Profits were too large, leading to waste","Consumers had too much control over production","Planners and managers had little personal gain from correcting shortages or innovating"],"answer":3,"explanation":"Command systems lacked the profit signal and personal reward that motivate fixing shortages and innovating in market economies."},
-{"id":"2-11","chapter":2,"prompt":"What does competition among many independent buyers and sellers do?","options":["Diffuses (disperses) economic power","Concentrates economic power in a few firms","Requires government to set prices","Eliminates the need for prices"],"answer":0,"explanation":"With many independent participants, no single buyer or seller can control price or output, so economic power is widely dispersed."},
-{"id":"2-12","chapter":2,"prompt":"In the circular flow model, how do money flows move relative to real flows of goods and resources?","options":["In the same direction as the real flows","They do not interact with the real flows","In the opposite direction to the real flows","Only through government, never directly"],"answer":2,"explanation":"Money payments flow opposite to goods and resources (counterclockwise in the textbook's diagram): households pay for goods; firms pay for resources."},
-{"id":"2-13","chapter":2,"prompt":"What do \"dollar votes\" refer to?","options":["Consumer sovereignty: what people spend on determines what gets produced","Voting in government elections with money","Government decisions about what gets produced","The exchange rate of the U.S. dollar"],"answer":0,"explanation":"Consumers \"vote\" with their spending; goods that receive enough dollar votes are profitable and get produced."},
-{"id":"2-14","chapter":2,"prompt":"In the circular flow model, where do households appear?","options":["On the buying side of the resource market and selling side of the product market","On the selling side of the resource market and buying side of the product market","On the buying side of both markets","On the selling side of both markets"],"answer":1,"explanation":"Households sell resources (labor, land, capital, entrepreneurship) to firms and buy goods and services from them."},
-{"id":"2-15","chapter":2,"prompt":"Which production technique is the economically efficient one?","options":["The one that uses the most workers","The one that uses the most machinery","The one that produces the highest-priced output","The one with the lowest total resource cost"],"answer":3,"explanation":"Economic efficiency means producing a given output at the lowest total cost of resources, given resource prices."},
-
-{"id":"3-1","chapter":3,"prompt":"What happens when a government-mandated price is set above the equilibrium price?","options":["Quantity supplied increases and quantity demanded decreases","Quantity supplied decreases and quantity demanded increases","Both quantity supplied and quantity demanded increase","A shortage of the product develops"],"answer":0,"explanation":"A price floor above equilibrium moves sellers up the supply curve and buyers up the demand curve, creating a surplus (Qs > Qd)."},
-
-{"id":"6-1","chapter":6,"prompt":"Along a linear, downward-sloping demand curve, how does price elasticity of demand behave?","options":["It is constant at every price","It is different across each price range","It always equals 1","It is always zero"],"answer":1,"explanation":"The slope is constant but percentage changes are not, so elasticity is high (elastic) at high prices and low (inelastic) at low prices."},
-{"id":"6-2","chapter":6,"prompt":"What does a perfectly elastic demand curve look like?","options":["Vertical","Horizontal","Downward sloping at 45 degrees","A curved rectangular hyperbola"],"answer":1,"explanation":"Perfectly elastic demand is horizontal: buyers will purchase any quantity at one price but nothing at a slightly higher price."},
-{"id":"6-3","chapter":6,"prompt":"The price of a good doubles from $20 to $40 and quantity demanded falls by half, from 100 to 50. Total revenue is unchanged. How is demand best described over this range?","options":["Perfectly inelastic (a vertical curve)","Perfectly elastic (a horizontal curve)","Unit elastic (a curved rectangular hyperbola)","Relatively inelastic (a steep straight line)"],"answer":2,"explanation":"Total revenue stays at $2,000 ($20×100 = $40×50), which is the mark of unit elasticity; a demand curve with constant total revenue is a curved rectangular hyperbola."},
-{"id":"6-4","chapter":6,"prompt":"Demand schedule: $10→20 units, $9→25, $8→30, $7→35, $6→40, $5→45. How is demand best described in the $10–$7 price range?","options":["Relatively inelastic","Perfectly inelastic","Perfectly elastic","Relatively elastic"],"answer":3,"explanation":"Using the midpoint formula from $10 to $7: %ΔQ = 15/27.5 ≈ 54.5% and %ΔP = 3/8.5 ≈ 35.3%, so Ed ≈ 1.55 > 1 (elastic)."},
-{"id":"6-5","chapter":6,"prompt":"What does price elasticity of demand measure?","options":["The responsiveness of sellers to changes in price","The responsiveness of buyers to changes in their income","The responsiveness of buyers of a good to changes in its price","The slope of the demand curve"],"answer":2,"explanation":"Ed = %Δ quantity demanded ÷ %Δ price; it measures how sensitive buyers are to price changes (and is not the same as slope)."},
-{"id":"6-6","chapter":6,"prompt":"Walmart sells 4,000 units at $20 and 5,000 units at $16. What is the price elasticity of demand, approximately?","options":["0.5","1.0","2.0","0.2"],"answer":1,"explanation":"Midpoint: %ΔQ = 1,000/4,500 ≈ 22.2% and %ΔP = 4/18 ≈ 22.2%, so Ed ≈ 1.0 (unit elastic)."},
-{"id":"6-7","chapter":6,"prompt":"Candy bars sell 19,000 units at $0.55 and 21,000 units at $0.45. What is the midpoint price elasticity of demand?","options":["2.0","1.0","0.1","0.5"],"answer":3,"explanation":"%ΔQ = 2,000/20,000 = 10% and %ΔP = $0.10/$0.50 = 20%, so Ed = 10% ÷ 20% = 0.5 (inelastic)."},
-{"id":"6-8","chapter":6,"prompt":"For a linear downward-sloping demand curve, where is demand elastic?","options":["At relatively high prices","At relatively low prices","At all prices","At no price"],"answer":0,"explanation":"At high prices (low quantities) a given price change is a small percentage while the quantity change is a large percentage, so Ed > 1."},
-{"id":"6-9","chapter":6,"prompt":"Alf's Hamburger sells 200 burgers at $8 and 140 burgers at $10. Using the midpoint formula, what is the elasticity and how is demand classified?","options":["0.63, inelastic","1.59, elastic","1.59, inelastic","3.00, elastic"],"answer":1,"explanation":"%ΔQ = 60/170 ≈ 35.3% and %ΔP = 2/9 ≈ 22.2%, so Ed ≈ 1.59; since it exceeds 1, demand is elastic."},
-{"id":"6-10","chapter":6,"prompt":"If demand is elastic, what is true of the price elasticity coefficient?","options":["It is less than one","It equals one","It is equal to zero","It is greater than one"],"answer":3,"explanation":"Elastic demand means the percentage change in quantity exceeds the percentage change in price, so Ed > 1."},
-{"id":"6-11","chapter":6,"prompt":"Elasticity coefficients: game controllers 1.43, ramen 0.67, espresso drinks 1.11, shampoo 0.29. For which goods would a 1% price decrease raise total revenue?","options":["Ramen and shampoo","All four goods","Game controllers and espresso drinks","None of the goods"],"answer":2,"explanation":"Cutting price raises total revenue only when demand is elastic (Ed > 1): game controllers (1.43) and espresso (1.11)."},
-{"id":"6-12","chapter":6,"prompt":"Between two given prices, which demand curve shows the largest change in quantity demanded?","options":["The relatively most inelastic curve","A perfectly inelastic (vertical) curve","The steepest curve","The relatively most elastic curve"],"answer":3,"explanation":"For the same price change, the most elastic (flattest) demand curve produces the biggest response in quantity demanded."},
-{"id":"6-13","chapter":6,"prompt":"If the price elasticity of demand is 3.0, by about how much will quantity demanded fall when price rises from $400 to $500?","options":["About 25%","About 3%","About 75%","About 33%"],"answer":2,"explanation":"Simple percent change: %ΔP = $100/$400 = 25%, so %ΔQ ≈ 3.0 × 25% = 75%. (With the midpoint formula, %ΔP = 100/450 ≈ 22.2%, giving ≈ 67%.)"}
+{"id": "1-1", "chapter": 1, "prompt": "If a firm like Sony produces too few earbuds, what does this suggest?", "options": ["Rational choice cannot be applied to this decision", "Marginal cost exceeds marginal benefit at the current output", "Government should intervene in the earbud market", "Marginal benefit exceeds marginal cost at the current output"], "answer": 3, "explanation": "Producing \"too few\" means that at the current quantity MB is still greater than MC, so producing more units would add net benefit until MB = MC.", "reasons": ["Producing too few means the last unit cost more to make than it was worth to buyers.", "Output should expand until MB = MC; producing \"too few\" means the last unit's MB is still above its MC.", "Firms produce too few only when the government sets their output quota."], "reasonAnswer": 1},
+{"id": "1-2", "chapter": 1, "prompt": "How does a fast-food restaurant illustrate that people respond to incentives?", "options": ["Customers select the shortest line", "Menu prices are posted above the counter", "Employees wear matching uniforms", "The restaurant stays open late at night"], "answer": 0, "explanation": "Choosing the shortest line reduces the cost (waiting time) of getting food; people change behavior in response to changes in costs and benefits.", "reasons": ["The shortest line always has lower menu prices.", "Waiting time is a cost, and people change their behavior to reduce the costs they face.", "Restaurant rules require customers to join the shortest line."], "reasonAnswer": 1},
+{"id": "1-3", "chapter": 1, "prompt": "Why do people rarely buy a second copy of the same inexpensive newspaper?", "options": ["The marginal benefit of a second paper exceeds its marginal cost", "The marginal benefit of a second paper is less than its marginal cost", "Newspapers are not scarce goods", "People do not behave rationally when buying cheap items"], "answer": 1, "explanation": "A second identical paper adds almost no extra benefit, so its MB falls below its price (MC); rational buyers stop at one.", "reasons": ["The total benefit of reading any newspaper is zero.", "The sunk cost of the first paper makes the second copy more expensive.", "A second identical copy adds little or no extra benefit, yet it costs the full price."], "reasonAnswer": 2},
+{"id": "1-4", "chapter": 1, "prompt": "What does the term \"ceteris paribus\" mean?", "options": ["Let the buyer beware", "Other things equal", "The economy is at full employment", "All resources are scarce"], "answer": 1, "explanation": "Ceteris paribus (\"other things equal\") means holding all other relevant factors constant while examining the effect of one variable.", "reasons": ["It is the Latin term for assuming everyone has equal income.", "It means the economy must be in equilibrium before any analysis can be done.", "Economists hold all other influences constant to isolate the effect of one variable."], "reasonAnswer": 2},
+{"id": "1-5", "chapter": 1, "prompt": "Economic models (such as those in microeconomics) are commonly used for what purpose?", "options": ["Describing every detail of the real economy exactly", "Replacing the need for real-world data", "Deciding which policies are morally right", "Analyzing the behavior of a typical or average consumer or firm"], "answer": 3, "explanation": "Models simplify reality to explain and predict how a typical (representative) consumer or firm behaves and responds to changes.", "reasons": ["Models simplify reality so economists can explain and predict how a representative decision maker responds to changes.", "Models aim to reproduce every real-world detail exactly.", "Models exist mainly to decide which outcomes are fair."], "reasonAnswer": 0},
+{"id": "1-6", "chapter": 1, "prompt": "Jamal can study, work, or play basketball tonight, and he chooses to study. What is his opportunity cost?", "options": ["Working and playing basketball combined", "Zero, because studying is a productive activity", "It cannot be determined without knowing which activity was his next-best alternative", "The tuition he pays for his classes"], "answer": 2, "explanation": "Opportunity cost is the value of the single next-best alternative forgone, not all alternatives combined, so we must know which option Jamal ranked second.", "reasons": ["Opportunity cost is the sum of all the alternatives forgone.", "Opportunity cost is measured only by the money spent on a choice.", "Opportunity cost is the value of the single next-best alternative given up, not every alternative combined."], "reasonAnswer": 2},
+{"id": "1-7", "chapter": 1, "prompt": "What is a consequence of scarcity?", "options": ["Individuals have to make choices from among alternatives", "All goods eventually become free", "Wants are eventually fully satisfied", "Prices always fall over time"], "answer": 0, "explanation": "Because resources are limited relative to wants, individuals and societies must choose among alternatives, and every choice has an opportunity cost.", "reasons": ["Limited resources can't satisfy all wants, so choosing one thing means giving up another.", "Scarcity means the government must assign what each person gets.", "Scarcity affects only low-income individuals, so only they must choose."], "reasonAnswer": 0},
+{"id": "1-8", "chapter": 1, "prompt": "When economists construct models, what do they do?", "options": ["Include every real-world detail", "Avoid making any assumptions", "Rely only on normative value judgments", "Make simplifying assumptions"], "answer": 3, "explanation": "Models are simplifications: economists deliberately abstract from irrelevant details (e.g., using ceteris paribus) to focus on key relationships.", "reasons": ["Real economies are simple, so assumptions don't change anything.", "Simplifying lets economists focus on the key relationships by setting aside irrelevant details.", "Assumptions guarantee that a model's predictions are always correct."], "reasonAnswer": 1},
+{"id": "1-9", "chapter": 1, "prompt": "What is the basic economic problem?", "options": ["Inflation", "Scarcity", "Government debt", "Unemployment"], "answer": 1, "explanation": "Economics exists because of scarcity: unlimited wants confront limited resources, forcing choices.", "reasons": ["Inflation is the root cause of every other economic issue.", "Scarcity exists only in poor countries with few natural resources.", "Unlimited wants run up against limited resources, forcing every society to make choices."], "reasonAnswer": 2},
+{"id": "1-10", "chapter": 1, "prompt": "What causes a parallel inward shift of a consumer's budget line?", "options": ["An increase in income", "A decrease in the price of one of the goods", "A decrease in income", "A change in the consumer's preferences"], "answer": 2, "explanation": "Lower income with unchanged prices shifts the budget line inward in parallel; a change in one good's price would pivot (rotate) the line instead.", "reasons": ["Any change in a good's price shifts the budget line in parallel.", "Less income at unchanged prices lowers both maximum quantities proportionally, so the line moves in without changing slope.", "A change in preferences moves the budget line inward."], "reasonAnswer": 1},
+{"id": "1-11", "chapter": 1, "prompt": "Why does scarcity persist?", "options": ["Available resources exceed economic wants", "Governments restrict production", "The money supply is limited", "Economic wants exceed available resources"], "answer": 3, "explanation": "Human wants are essentially unlimited while resources are limited, so scarcity never disappears.", "reasons": ["Firms deliberately withhold resources that would otherwise satisfy all wants.", "Scarcity is caused by high prices; lower prices would eliminate it.", "Human wants are essentially unlimited, while resources are finite."], "reasonAnswer": 2},
+{"id": "1-12", "chapter": 1, "prompt": "Momo chooses to attend class. What does that choice imply?", "options": ["The marginal costs of attending outweigh the marginal benefits", "Attending class has no opportunity cost", "The marginal benefits of attending outweigh the marginal costs", "Momo is not acting rationally"], "answer": 2, "explanation": "Rational decision makers take an action when its marginal benefit is at least as great as its marginal cost.", "reasons": ["Attending class has no cost, so any benefit at all justifies it.", "People decide using total benefits and ignore marginal costs.", "Rational people take an action when its extra benefit is at least as large as its extra cost."], "reasonAnswer": 2},
+{"id": "1-13", "chapter": 1, "prompt": "Which of the following is a normative statement?", "options": ["The nation's trade deficit increased last year", "The worsening balance of trade must be corrected if this nation is to remain competitive", "Higher tariffs tend to raise the prices of imported goods", "The unemployment rate was 4 percent in March"], "answer": 1, "explanation": "Normative statements express value judgments about what ought to be (\"must be corrected\"); the others are positive, testable statements of fact.", "reasons": ["It uses economic terms like \"balance of trade,\" which makes it normative.", "It expresses a value judgment about what ought to be done (\"must be corrected\") rather than a testable fact.", "It can be tested with trade data, which is what makes a statement normative."], "reasonAnswer": 1},
+{"id": "1-14", "chapter": 1, "prompt": "Emma gets in line at In-N-Out and then leaves before ordering. What does that imply?", "options": ["The marginal benefit of eating at In-N-Out exceeds the marginal cost of waiting", "Emma is behaving irrationally", "Waiting in line has no cost", "The marginal cost of waiting is greater than the marginal benefit of eating at In-N-Out"], "answer": 3, "explanation": "Leaving the line shows that, at the margin, the cost of continuing to wait exceeded the benefit she expected from the meal.", "reasons": ["She left because the total benefit of any meal there is zero.", "Leaving the line shows that the menu price of the meal went up.", "Rational people stop an activity once the extra cost of continuing exceeds the extra benefit."], "reasonAnswer": 2},
+{"id": "1-15", "chapter": 1, "prompt": "What can be said about a combination of goods that lies outside (beyond) a consumer's budget line?", "options": ["It is unattainable with current income and prices", "It is attainable with money left over", "It is attainable only by spending all income", "It is the consumer's most preferred affordable combination"], "answer": 0, "explanation": "Points beyond the budget line cost more than the consumer's income at current prices, so they cannot be purchased.", "reasons": ["Points beyond the budget line cost more than the consumer's income at current prices.", "Points beyond the line are affordable but leave some income unspent.", "Points beyond the line are ruled out by the consumer's preferences, not income."], "reasonAnswer": 0},
+{"id": "2-1", "chapter": 2, "prompt": "What does specialization permit?", "options": ["Each person to become fully self-sufficient", "The production of a larger output with fixed amounts of resources", "The elimination of all trade among individuals", "Production to take place without any resources"], "answer": 1, "explanation": "By letting people and regions focus on what they do best (and gain skill), specialization increases total output from the same resources.", "reasons": ["Specialization increases the total quantity of resources available.", "Specialization works by eliminating the need for trade.", "Focusing on what each person or region does best (plus gains in skill and less switching time) raises total output from the same inputs."], "reasonAnswer": 2},
+{"id": "2-2", "chapter": 2, "prompt": "In the Soviet Union and pre-reform China, what resulted from central planners' emphasis on quantity targets?", "options": ["Product quality and variety were neglected", "Luxury goods were overproduced", "Firms innovated too rapidly", "Consumer sovereignty guided production"], "answer": 0, "explanation": "Managers were rewarded for meeting output quotas, so they sacrificed quality and variety to hit the numbers.", "reasons": ["Managers were rewarded for hitting output quotas, not for satisfying consumers, so they cut corners on quality and variety.", "Consumers' dollar votes pushed firms toward cheap, low-quality goods.", "Fierce competition among firms drove quality down."], "reasonAnswer": 0},
+{"id": "2-3", "chapter": 2, "prompt": "If an industry is neither expanding nor contracting, what are economic profits in that industry?", "options": ["Large and positive", "Negative (economic losses)", "Zero", "Impossible to determine"], "answer": 2, "explanation": "Economic profits attract entry and losses cause exit; with zero economic profit (normal profit only) there is no incentive to enter or leave.", "reasons": ["Economic profits attract entry and losses cause exit; with zero economic profit firms earn just a normal profit, so no one enters or leaves.", "Zero economic profit means firms are losing money and will soon leave.", "An industry stops changing size only when the government freezes entry."], "reasonAnswer": 0},
+{"id": "2-4", "chapter": 2, "prompt": "A firm can produce a good that sells for $40 at a least-cost of $30 per unit. What will happen?", "options": ["It will earn $30 of economic profit and may use any technique", "It will earn $70 of economic profit", "It will suffer a $10 economic loss", "It will realize $10 of economic profit and use the least-cost technique"], "answer": 3, "explanation": "Economic profit = price − cost = $40 − $30 = $10; competition and the profit motive push firms to use the least-cost production technique.", "reasons": ["Economic profit equals price plus cost.", "Economic profit is price minus cost ($40 − $30), and the profit motive plus competition push firms to the lowest-cost method.", "Firms can use any technique because profit does not depend on cost."], "reasonAnswer": 1},
+{"id": "2-5", "chapter": 2, "prompt": "What do clearly defined and enforced property rights encourage?", "options": ["Theft and free-riding", "Investment, maintenance, and mutually agreeable trades", "Central planning of production", "Firms to avoid long-term investment"], "answer": 1, "explanation": "When people can keep the returns from their property, they invest in and maintain it and can trade it voluntarily.", "reasons": ["Property rights let the government decide how each resource is used.", "When people can keep the returns from their property, they have reason to invest in it, maintain it, and trade it voluntarily.", "Property rights matter mainly because they prevent owners from trading."], "reasonAnswer": 1},
+{"id": "2-6", "chapter": 2, "prompt": "Which country is the best example of a market economy?", "options": ["North Korea", "Cuba", "The former Soviet Union", "Singapore"], "answer": 3, "explanation": "Singapore relies heavily on private property and markets, whereas North Korea, Cuba, and the Soviet Union are/were command economies.", "reasons": ["It has a central planning board that sets most prices.", "It relies heavily on private property, free markets, and prices to allocate resources.", "Its government owns most businesses and assigns people to jobs."], "reasonAnswer": 1},
+{"id": "2-7", "chapter": 2, "prompt": "In a market system, why are producers free to enter or leave an industry?", "options": ["They follow their own self-interest in search of profit", "The government assigns each firm to an industry", "Central planners require them to move", "Consumers vote on which firms may operate"], "answer": 0, "explanation": "Freedom of enterprise plus self-interest means firms move resources toward industries with profits and away from those with losses.", "reasons": ["Freedom of enterprise lets firms chase profits, moving resources into profitable industries and out of losing ones.", "Government licenses assign firms to industries each year.", "Firms must stay in an industry until planners release them."], "reasonAnswer": 0},
+{"id": "2-8", "chapter": 2, "prompt": "Why did centrally planned economies tend to lag in innovation?", "options": ["Too much competition among firms", "Excessive profit incentives for managers", "There was little personal gain from innovating or fixing shortages", "Consumers demanded too many new products"], "answer": 2, "explanation": "Without profits or private ownership, managers and workers captured little reward from new products or better methods, so innovation stagnated.", "reasons": ["Intense competition left firms with no money for research.", "Consumers' dollar votes kept demanding the same old products.", "Without profits or private ownership, managers and workers gained little from new products or better methods."], "reasonAnswer": 2},
+{"id": "2-9", "chapter": 2, "prompt": "In the circular flow model, what does the money flow from businesses through the resource market (to households) represent?", "options": ["Consumer expenditures on goods and services", "Wage, rent, interest, and profit income", "Finished goods and services", "Tax payments to government"], "answer": 1, "explanation": "Businesses buy resources from households, paying them income in the form of wages, rent, interest, and profits.", "reasons": ["Households pay businesses for resources in the resource market.", "This flow is the goods and services households receive from businesses.", "Firms buy households' resources (labor, land, capital, entrepreneurial ability) and pay them income for those resources."], "reasonAnswer": 2},
+{"id": "2-10", "chapter": 2, "prompt": "What was a key incentive problem under central planning?", "options": ["Firms competed too aggressively on price", "Profits were too large, leading to waste", "Consumers had too much control over production", "Planners and managers had little personal gain from correcting shortages or innovating"], "answer": 3, "explanation": "Command systems lacked the profit signal and personal reward that motivate fixing shortages and innovating in market economies.", "reasons": ["Managers under central planning were too focused on earning profits.", "Planners faced too much market competition to fix shortages.", "Command systems lacked the profit signal and personal rewards that motivate fixing shortages and innovating."], "reasonAnswer": 2},
+{"id": "2-11", "chapter": 2, "prompt": "What does competition among many independent buyers and sellers do?", "options": ["Diffuses (disperses) economic power", "Concentrates economic power in a few firms", "Requires government to set prices", "Eliminates the need for prices"], "answer": 0, "explanation": "With many independent participants, no single buyer or seller can control price or output, so economic power is widely dispersed.", "reasons": ["Competition lets the largest firm set the market price.", "With many independent participants, no single buyer or seller can control price or output.", "The government must assign market shares for competition to exist."], "reasonAnswer": 1},
+{"id": "2-12", "chapter": 2, "prompt": "In the circular flow model, how do money flows move relative to real flows of goods and resources?", "options": ["In the same direction as the real flows", "They do not interact with the real flows", "In the opposite direction to the real flows", "Only through government, never directly"], "answer": 2, "explanation": "Money payments flow opposite to goods and resources (counterclockwise in the textbook's diagram): households pay for goods; firms pay for resources.", "reasons": ["Money and goods both flow from businesses to households.", "Every real flow has a matching payment: households pay for the goods they receive, and firms pay for the resources they receive.", "Money circulates only among households and never reaches firms."], "reasonAnswer": 1},
+{"id": "2-13", "chapter": 2, "prompt": "What do \"dollar votes\" refer to?", "options": ["Consumer sovereignty: what people spend on determines what gets produced", "Voting in government elections with money", "Government decisions about what gets produced", "The exchange rate of the U.S. dollar"], "answer": 0, "explanation": "Consumers \"vote\" with their spending; goods that receive enough dollar votes are profitable and get produced.", "reasons": ["Citizens vote in elections on which goods firms may produce.", "Spending signals what consumers want; products that attract enough spending are profitable and get produced.", "Firms decide production first, and consumers must buy whatever is made."], "reasonAnswer": 1},
+{"id": "2-14", "chapter": 2, "prompt": "In the circular flow model, where do households appear?", "options": ["On the buying side of the resource market and selling side of the product market", "On the selling side of the resource market and buying side of the product market", "On the buying side of both markets", "On the selling side of both markets"], "answer": 1, "explanation": "Households sell resources (labor, land, capital, entrepreneurship) to firms and buy goods and services from them.", "reasons": ["Businesses own all resources and sell them to households.", "Households own the resources and sell them to firms, then use that income to buy goods and services.", "Households produce the goods that are sold in the product market."], "reasonAnswer": 1},
+{"id": "2-15", "chapter": 2, "prompt": "Which production technique is the economically efficient one?", "options": ["The one that uses the most workers", "The one that uses the most machinery", "The one that produces the highest-priced output", "The one with the lowest total resource cost"], "answer": 3, "explanation": "Economic efficiency means producing a given output at the lowest total cost of resources, given resource prices.", "reasons": ["Efficiency means employing as many workers as possible.", "Efficiency means producing a given output at the lowest total cost of all resources, given their prices.", "Efficiency means producing the most expensive product."], "reasonAnswer": 1},
+{"id": "3-1", "chapter": 3, "prompt": "What happens when a government-mandated price is set above the equilibrium price?", "options": ["Quantity supplied increases and quantity demanded decreases", "Quantity supplied decreases and quantity demanded increases", "Both quantity supplied and quantity demanded increase", "A shortage of the product develops"], "answer": 0, "explanation": "A price floor above equilibrium moves sellers up the supply curve and buyers up the demand curve, creating a surplus (Qs > Qd).", "reasons": ["A higher price shifts the whole demand curve to the right.", "At a price above equilibrium, sellers move up the supply curve (more Qs) and buyers move up the demand curve (less Qd), creating a surplus.", "A price floor shifts the supply curve left, causing a shortage."], "reasonAnswer": 1},
+{"id": "6-1", "chapter": 6, "prompt": "Along a linear, downward-sloping demand curve, how does price elasticity of demand behave?", "options": ["It is constant at every price", "It is different across each price range", "It always equals 1", "It is always zero"], "answer": 1, "explanation": "The slope is constant but percentage changes are not, so elasticity is high (elastic) at high prices and low (inelastic) at low prices.", "reasons": ["Elasticity equals slope, and a straight line has a constant slope.", "Elasticity changes only when the demand curve shifts.", "The slope is constant, but a given price change is a small percentage at high prices and a large percentage at low prices (the reverse for quantity)."], "reasonAnswer": 2},
+{"id": "6-2", "chapter": 6, "prompt": "What does a perfectly elastic demand curve look like?", "options": ["Vertical", "Horizontal", "Downward sloping at 45 degrees", "A curved rectangular hyperbola"], "answer": 1, "explanation": "Perfectly elastic demand is horizontal: buyers will purchase any quantity at one price but nothing at a slightly higher price.", "reasons": ["Buyers will purchase any amount at one price but nothing at even a slightly higher price.", "Quantity demanded does not change at all when price changes.", "Total revenue stays the same at every price."], "reasonAnswer": 0},
+{"id": "6-3", "chapter": 6, "prompt": "The price of a good doubles from $20 to $40 and quantity demanded falls by half, from 100 to 50. Total revenue is unchanged. How is demand best described over this range?", "options": ["Perfectly inelastic (a vertical curve)", "Perfectly elastic (a horizontal curve)", "Unit elastic (a curved rectangular hyperbola)", "Relatively inelastic (a steep straight line)"], "answer": 2, "explanation": "Total revenue stays at $2,000 ($20×100 = $40×50), which is the mark of unit elasticity; a demand curve with constant total revenue is a curved rectangular hyperbola.", "reasons": ["Quantity changed when price changed, so demand must be perfectly elastic.", "Total revenue stays at $2,000 ($20×100 = $40×50), and unchanged total revenue after a price change is the sign of unit elasticity.", "Total revenue rose when price doubled, so demand must be inelastic."], "reasonAnswer": 1},
+{"id": "6-4", "chapter": 6, "prompt": "Demand schedule: $10→20 units, $9→25, $8→30, $7→35, $6→40, $5→45. How is demand best described in the $10–$7 price range?", "options": ["Relatively inelastic", "Perfectly inelastic", "Perfectly elastic", "Relatively elastic"], "answer": 3, "explanation": "Using the midpoint formula from $10 to $7: %ΔQ = 15/27.5 ≈ 54.5% and %ΔP = 3/8.5 ≈ 35.3%, so Ed ≈ 1.55 > 1 (elastic).", "reasons": ["Quantity changes by the same 5 units per $1, so elasticity is constant at 1.", "Demand is elastic at every price above $5 on any demand curve.", "From $10 to $7 the percentage change in quantity (≈55% midpoint) exceeds the percentage change in price (≈35%), so Ed > 1."], "reasonAnswer": 2},
+{"id": "6-5", "chapter": 6, "prompt": "What does price elasticity of demand measure?", "options": ["The responsiveness of sellers to changes in price", "The responsiveness of buyers to changes in their income", "The responsiveness of buyers of a good to changes in its price", "The slope of the demand curve"], "answer": 2, "explanation": "Ed = %Δ quantity demanded ÷ %Δ price; it measures how sensitive buyers are to price changes (and is not the same as slope).", "reasons": ["Ed compares the percentage change in quantity demanded with the percentage change in the good's own price.", "Ed compares quantity demanded with changes in consumer income.", "Ed is simply the slope of the demand curve (ΔP/ΔQ)."], "reasonAnswer": 0},
+{"id": "6-6", "chapter": 6, "prompt": "Walmart sells 4,000 units at $20 and 5,000 units at $16. What is the price elasticity of demand, approximately?", "options": ["0.5", "1.0", "2.0", "0.2"], "answer": 1, "explanation": "Midpoint: %ΔQ = 1,000/4,500 ≈ 22.2% and %ΔP = 4/18 ≈ 22.2%, so Ed ≈ 1.0 (unit elastic).", "reasons": ["The coefficient is the change in quantity (1,000) divided by the change in price ($4).", "With midpoints, %ΔQ = 1,000/4,500 ≈ 22% and %ΔP = $4/$18 ≈ 22%, so the ratio is about 1.", "Elasticity is always 1.0 at every point on any demand curve."], "reasonAnswer": 1},
+{"id": "6-7", "chapter": 6, "prompt": "Candy bars sell 19,000 units at $0.55 and 21,000 units at $0.45. What is the midpoint price elasticity of demand?", "options": ["2.0", "1.0", "0.1", "0.5"], "answer": 3, "explanation": "%ΔQ = 2,000/20,000 = 10% and %ΔP = $0.10/$0.50 = 20%, so Ed = 10% ÷ 20% = 0.5 (inelastic).", "reasons": ["Elasticity is %ΔP ÷ %ΔQ = 20% ÷ 10%.", "Divide the change in quantity (2,000) by the change in price ($0.10).", "Midpoint %ΔQ = 2,000/20,000 = 10% and %ΔP = $0.10/$0.50 = 20%; 10% ÷ 20% = 0.5."], "reasonAnswer": 2},
+{"id": "6-8", "chapter": 6, "prompt": "For a linear downward-sloping demand curve, where is demand elastic?", "options": ["At relatively high prices", "At relatively low prices", "At all prices", "At no price"], "answer": 0, "explanation": "At high prices (low quantities) a given price change is a small percentage while the quantity change is a large percentage, so Ed > 1.", "reasons": ["At high prices a price change is a small percentage of the price while the quantity change is a large percentage of a small quantity, so Ed > 1.", "A linear demand curve is flatter at high prices.", "Consumers have more substitutes available only at low prices."], "reasonAnswer": 0},
+{"id": "6-9", "chapter": 6, "prompt": "Alf's Hamburger sells 200 burgers at $8 and 140 burgers at $10. Using the midpoint formula, what is the elasticity and how is demand classified?", "options": ["0.63, inelastic", "1.59, elastic", "1.59, inelastic", "3.00, elastic"], "answer": 1, "explanation": "%ΔQ = 60/170 ≈ 35.3% and %ΔP = 2/9 ≈ 22.2%, so Ed ≈ 1.59; since it exceeds 1, demand is elastic.", "reasons": ["%ΔQ = 60/170 ≈ 35.3% and %ΔP = $2/$9 ≈ 22.2%; 35.3 ÷ 22.2 ≈ 1.59, which is greater than 1.", "Any coefficient above 0.5 counts as elastic.", "Demand is elastic because total revenue rose when price rose."], "reasonAnswer": 0},
+{"id": "6-10", "chapter": 6, "prompt": "If demand is elastic, what is true of the price elasticity coefficient?", "options": ["It is less than one", "It equals one", "It is equal to zero", "It is greater than one"], "answer": 3, "explanation": "Elastic demand means the percentage change in quantity exceeds the percentage change in price, so Ed > 1.", "reasons": ["Elastic means quantity changes less than price in percentage terms.", "Elastic means the % change in quantity demanded is larger than the % change in price, so their ratio exceeds 1.", "Elastic means the demand curve is vertical."], "reasonAnswer": 1},
+{"id": "6-11", "chapter": 6, "prompt": "Elasticity coefficients: game controllers 1.43, ramen 0.67, espresso drinks 1.11, shampoo 0.29. For which goods would a 1% price decrease raise total revenue?", "options": ["Ramen and shampoo", "All four goods", "Game controllers and espresso drinks", "None of the goods"], "answer": 2, "explanation": "Cutting price raises total revenue only when demand is elastic (Ed > 1): game controllers (1.43) and espresso (1.11).", "reasons": ["Lowering price raises total revenue for every good.", "When demand is elastic (Ed > 1), the % rise in quantity exceeds the % price cut, so total revenue rises.", "A price cut raises total revenue when demand is inelastic (Ed < 1)."], "reasonAnswer": 1},
+{"id": "6-12", "chapter": 6, "prompt": "Between two given prices, which demand curve shows the largest change in quantity demanded?", "options": ["The relatively most inelastic curve", "A perfectly inelastic (vertical) curve", "The steepest curve", "The relatively most elastic curve"], "answer": 3, "explanation": "For the same price change, the most elastic (flattest) demand curve produces the biggest response in quantity demanded.", "reasons": ["The steepest curve always has the largest change in quantity.", "All demand curves show the same quantity change between two prices.", "For the same price change, the most elastic (flattest) curve has the biggest quantity response."], "reasonAnswer": 2},
+{"id": "6-13", "chapter": 6, "prompt": "If the price elasticity of demand is 3.0, by about how much will quantity demanded fall when price rises from $400 to $500?", "options": ["About 25%", "About 3%", "About 75%", "About 33%"], "answer": 2, "explanation": "Simple percent change: %ΔP = $100/$400 = 25%, so %ΔQ ≈ 3.0 × 25% = 75%. (With the midpoint formula, %ΔP = 100/450 ≈ 22.2%, giving ≈ 67%.)", "reasons": ["%ΔQ = %ΔP ÷ Ed = 25% ÷ 3.", "%ΔQ ≈ Ed × %ΔP = 3.0 × 25% = 75% (the midpoint method gives ≈ 67%).", "Quantity falls by the elasticity number itself, so 3%."], "reasonAnswer": 1}
 ]
 </script>
 
@@ -246,84 +304,121 @@ var QUESTIONS = JSON.parse(document.getElementById('quiz-data').textContent);
 var QBYID = {}; QUESTIONS.forEach(function(q){QBYID[q.id]=q;});
 var CHAPTERS = {1:"Limits, Alternatives, Choices",2:"Market System & Circular Flow",3:"Demand, Supply & Equilibrium",6:"Elasticity"};
 var LETTERS = ["A","B","C","D"];
-var KEY_V1 = "econ202_quiz_stats_v1";   // legacy: {id:{seen,missed}}
-var KEY = "econ202_progress";            // current: versioned object
-var SCHEMA = 2, HISTORY_N = 10, MASTERY_STREAK = 3, DRILL_SIZE = 15;
+var KEY_V1 = "econ202_quiz_stats_v1";   // legacy v1: {id:{seen,missed}}
+var KEY = "econ202_progress";            // versioned object (v2 -> v3 in place)
+var KEY_SETTINGS = "econ202_settings";
+var SCHEMA = 3, HISTORY_N = 10, MASTERY_STREAK = 3, DRILL_SIZE = 15, DAY = 86400000;
+var LADDER = [1,3,7,14,30,60];            // spaced-review intervals (days)
+var MODE_LABEL = {standard:"Quiz",hardest:"Hardest drill",retry:"Retry missed",review:"Review due",exam:"Exam"};
 var $ = function(id){return document.getElementById(id);};
+function now(){return Date.now();}
+
+/* ================= spaced repetition ================= */
+function startOfDay(t){var d=new Date(t);d.setHours(0,0,0,0);return d.getTime();}
+function addDays(t,n){var d=new Date(startOfDay(t));d.setDate(d.getDate()+n);return d.getTime();}   // local midnight n days later (DST-safe)
+function stepUp(iv){for(var i=0;i<LADDER.length;i++)if(LADDER[i]>iv)return LADDER[i];return LADDER[LADDER.length-1];}
+function stepDown(iv){var p=1;for(var i=0;i<LADDER.length;i++){if(LADDER[i]>=iv)break;p=LADDER[i];}return Math.max(1,p);}
+function streakInterval(st){return st<=0?0:LADDER[Math.min(st,5)-1];}   // 1→1d 2→3d 3→7d 4→14d 5+→30d
+function schedule(srs,outcome,t){
+  // correct: grow one step; shaky: step down (min 1 day); wrong: reset, due again today
+  srs=srs||{interval:0,due:t,reps:0};
+  var iv = outcome==="correct"?stepUp(srs.interval):outcome==="shaky"?stepDown(srs.interval):0;
+  return {interval:iv,due:iv?addDays(t,iv):t,reps:(srs.reps||0)+1};
+}
 
 /* ================= storage / schema ================= */
-function blank(){return {version:SCHEMA,createdAt:Date.now(),questions:{},sessions:[],mergedExports:[]};}
-function blankQ(){return {attempts:0,correct:0,history:[],streak:0,lastSeen:null};}
+function blank(){return {version:SCHEMA,createdAt:now(),questions:{},sessions:[],mergedExports:[]};}
+function blankQ(){return {attempts:0,correct:0,shaky:0,history:[],streak:0,lastSeen:null,reasonAttempts:0,reasonCorrect:0,srs:null};}
 function fromV1(old){
-  var d=blank(); d.migratedFromV1=Date.now();
+  var d={version:2,createdAt:now(),questions:{},sessions:[],migratedFromV1:now()};
   Object.keys(old||{}).forEach(function(id){
     var o=old[id]; if(!o||typeof o.seen!=="number") return;
-    var q=blankQ(); q.attempts=o.seen; q.correct=Math.max(0,o.seen-(o.missed||0)); d.questions[id]=q;
+    d.questions[id]={attempts:o.seen,correct:Math.max(0,o.seen-(o.missed||0)),history:[],streak:0,lastSeen:null};
   });
   return d;
 }
 function normalize(d){
-  // accept v1 objects or v2 objects; returns a valid v2 object or null
+  // accepts v1, v2 or v3 objects; returns a valid v3 object or null
   if(!d||typeof d!=="object") return null;
-  if(d.version===undefined){ // looks like v1?
-    var ks=Object.keys(d); if(ks.length&&ks.every(function(k){return d[k]&&typeof d[k].seen==="number";})) return fromV1(d);
-    if(!ks.length) return blank();
-    return null;
+  if(d.version===undefined){
+    var ks=Object.keys(d); if(ks.length&&ks.every(function(k){return d[k]&&typeof d[k].seen==="number";})) d=fromV1(d);
+    else if(!ks.length) return blank(); else return null;
   }
   if(typeof d.version!=="number"||d.version>SCHEMA) return null;
-  var out=blank(); out.createdAt=d.createdAt||Date.now();
+  var from=d.version, out=blank(); out.createdAt=d.createdAt||now();
   if(d.migratedFromV1) out.migratedFromV1=d.migratedFromV1;
+  if(from<3) out.migratedFromV2=d.migratedFromV2||now(); else if(d.migratedFromV2) out.migratedFromV2=d.migratedFromV2;
   out.mergedExports=Array.isArray(d.mergedExports)?d.mergedExports.slice(-50):[];
   Object.keys(d.questions||{}).forEach(function(id){
+    if(!QBYID[id]) return;
     var s=d.questions[id]||{}, q=blankQ();
-    q.attempts=+s.attempts||0; q.correct=Math.min(q.attempts,+s.correct||0);
-    q.history=(Array.isArray(s.history)?s.history:[]).filter(function(h){return h&&typeof h.t==="number";}).map(function(h){return {t:h.t,ok:!!h.ok};}).sort(function(a,b){return a.t-b.t;}).slice(-HISTORY_N);
+    q.attempts=+s.attempts||0; q.correct=Math.min(q.attempts,+s.correct||0); q.shaky=Math.min(q.correct,+s.shaky||0);
+    q.history=(Array.isArray(s.history)?s.history:[]).filter(function(h){return h&&typeof h.t==="number";})
+      .map(function(h){var o={t:h.t,ok:!!h.ok};if(h.ok&&h.s)o.s=true;return o;}).sort(function(a,b){return a.t-b.t;}).slice(-HISTORY_N);
     q.streak=+s.streak||0; q.lastSeen=s.lastSeen||null;
+    q.reasonAttempts=+s.reasonAttempts||0; q.reasonCorrect=Math.min(q.reasonAttempts,+s.reasonCorrect||0);
+    if(s.srs&&typeof s.srs.due==="number") q.srs={interval:+s.srs.interval||0,due:s.srs.due,reps:+s.srs.reps||0};
+    else if(q.attempts>0){ // v2 -> v3: interval from current streak; unseen questions stay new (srs null)
+      var iv=streakInterval(q.streak), base=q.lastSeen||now();
+      q.srs={interval:iv,due:iv?addDays(base,iv):base,reps:q.attempts};
+    }
     out.questions[id]=q;
   });
   out.sessions=(Array.isArray(d.sessions)?d.sessions:[]).filter(function(s){return s&&s.id&&s.answered>0;});
   return out;
 }
+var storageOK=true;
+function persist(d){try{localStorage.setItem(KEY,JSON.stringify(d||DATA));storageOK=true;}catch(e){storageOK=false;}}
 function load(){
   var d=null;
   try{ var raw=localStorage.getItem(KEY); if(raw) d=normalize(JSON.parse(raw)); }catch(e){}
-  if(!d){
-    try{ var old=localStorage.getItem(KEY_V1); if(old){ d=fromV1(JSON.parse(old)); } }catch(e){}
-  }
+  if(!d){ try{ var old=localStorage.getItem(KEY_V1); if(old) d=normalize(JSON.parse(old)); }catch(e){} }
   d=d||blank(); persist(d); return d;
 }
-var storageOK=true;
-function persist(d){try{localStorage.setItem(KEY,JSON.stringify(d||DATA));storageOK=true;}catch(e){storageOK=false;}}
 var DATA = load();
+var SETTINGS = (function(){try{return JSON.parse(localStorage.getItem(KEY_SETTINGS))||{};}catch(e){return {};}})();
+if(SETTINGS.reasoning===undefined) SETTINGS.reasoning=true;
+function saveSettings(){try{localStorage.setItem(KEY_SETTINGS,JSON.stringify(SETTINGS));}catch(e){}}
 
-/* ================= difficulty / mastery ================= */
+/* ================= difficulty / mastery / due ================= */
 function qs(id){return DATA.questions[id];}
 function isMastered(id){var s=qs(id);return !!s&&s.streak>=MASTERY_STREAK;}
-function accuracy(id){var s=qs(id);return s&&s.attempts?s.correct/s.attempts:null;}
-// 0 (easy) .. 1 (hard); unseen = 0.5 neutral.
-// lifetime accuracy is smoothed toward 50% (Laplace); recent history is exponentially weighted (newest weight 1, x0.7 per step back).
+function isDue(id,at){var s=qs(id);return !!(s&&s.srs&&s.srs.due<=(at||now()));}
+function hval(h){return h.ok?(h.s?0.5:1):0;}   // truly correct 1, shaky 0.5, wrong 0
+// 0 (easy)..1 (hard); unseen = 0.5. Lifetime accuracy (shaky = half credit) smoothed toward 50%,
+// blended 35/65 with exponentially weighted recent history (newest weight 1, x0.7 per step back).
 function difficulty(id){
   var s=qs(id); if(!s||!s.attempts) return 0.5;
-  var life=(s.correct+1)/(s.attempts+2);
+  var life=(s.correct-0.5*s.shaky+1)/(s.attempts+2);
   var recent=life, h=s.history;
-  if(h.length){var w=1,sw=0,sa=0;for(var i=h.length-1;i>=0;i--){sw+=w;sa+=w*(h[i].ok?1:0);w*=0.7;}recent=sa/sw;}
+  if(h.length){var w=1,sw=0,sa=0;for(var i=h.length-1;i>=0;i--){sw+=w;sa+=w*hval(h[i]);w*=0.7;}recent=sa/sw;}
   var acc=h.length?0.35*life+0.65*recent:life;
   return Math.round((1-acc)*1000)/1000;
 }
-function recordAnswer(id,ok){
-  var s=qs(id)||(DATA.questions[id]=blankQ()), t=Date.now();
-  s.attempts++; if(ok) s.correct++;
-  s.history.push({t:t,ok:ok}); if(s.history.length>HISTORY_N) s.history=s.history.slice(-HISTORY_N);
-  s.streak=ok?s.streak+1:0; s.lastSeen=t;
-  // session log (created lazily on first answer, updated on every answer)
-  var sess=S.session;
-  if(!sess.logged){ DATA.sessions.push(sess.rec); sess.logged=true; }
-  var r=sess.rec, ch=String(QBYID[id].chapter);
-  r.answered++; if(ok) r.correct++; r.end=t;
-  r.score=Math.round(r.correct/r.answered*100);
-  r.byChapter[ch]=r.byChapter[ch]||{correct:0,answered:0};
-  r.byChapter[ch].answered++; if(ok) r.byChapter[ch].correct++;
-  persist();
+// outcome: "correct" | "shaky" | "wrong"; reason: null (no step) | "right" | "wrong" | "guess"
+function recordAnswer(id,outcome,reason,sess,t){
+  t=t||now();
+  var s=qs(id)||(DATA.questions[id]=blankQ()), ok=outcome!=="wrong";
+  s.attempts++; if(ok) s.correct++; if(outcome==="shaky") s.shaky++;
+  var h={t:t,ok:ok}; if(outcome==="shaky") h.s=true;
+  s.history.push(h); if(s.history.length>HISTORY_N) s.history=s.history.slice(-HISTORY_N);
+  if(outcome==="correct") s.streak++; else if(outcome==="wrong") s.streak=0;   // shaky: streak unchanged (doesn't build mastery)
+  s.lastSeen=t;
+  if(reason){s.reasonAttempts++; if(reason==="right") s.reasonCorrect++;}
+  s.srs=schedule(s.srs,outcome,t);
+  if(sess){
+    if(!sess.logged){ DATA.sessions.push(sess.rec); sess.logged=true; }
+    var r=sess.rec, ch=String(QBYID[id].chapter);
+    r.answered++; if(ok) r.correct++; if(outcome==="shaky") r.shaky=(r.shaky||0)+1;
+    if(reason){r.reasonAttempts=(r.reasonAttempts||0)+1; if(reason==="right") r.reasonCorrect=(r.reasonCorrect||0)+1;}
+    r.end=t; r.score=Math.round(r.correct/r.answered*100);
+    r.byChapter[ch]=r.byChapter[ch]||{correct:0,answered:0};
+    r.byChapter[ch].answered++; if(ok) r.byChapter[ch].correct++;
+  }
+}
+function newSession(mode,list){
+  var chs=[];list.forEach(function(q){if(chs.indexOf(q.chapter)<0)chs.push(q.chapter);});chs.sort();
+  return {logged:false,rec:{id:now().toString(36)+Math.random().toString(36).slice(2,7),start:now(),end:null,mode:mode,chapters:chs,answered:0,correct:0,score:0,byChapter:{}}};
 }
 
 /* ================= helpers ================= */
@@ -331,10 +426,17 @@ function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(M
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
 function dayKey(t){var d=new Date(t);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
 function fmtDate(t){return new Date(t).toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});}
-function show(id){['start','quiz','end','stats'].forEach(function(s){$(s).classList.toggle('hidden',s!==id);});window.scrollTo(0,0);}
+function fmtClock(sec){sec=Math.max(0,Math.round(sec));var h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),s=sec%60;return (h?h+":"+String(m).padStart(2,"0"):m)+":"+String(s).padStart(2,"0");}
+function dueLabel(id){
+  var s=qs(id); if(!s||!s.srs) return "new";
+  var d=Math.round((startOfDay(s.srs.due)-startOfDay(now()))/DAY);
+  return s.srs.due<=now()?"due now":d<=0?"due later today":d===1?"due tomorrow":"due in "+d+"d";
+}
+var SCREENS=['start','quiz','exam','end','stats'];
+function show(id){SCREENS.forEach(function(s){$(s).classList.toggle('hidden',s!==id);});window.scrollTo(0,0);}
 
 /* ================= start screen ================= */
-var S = {deck:[],idx:0,score:0,answered:false,results:[],mode:"standard",session:null};
+var S = {deck:[],idx:0,score:0,phase:"answer",results:[],mode:"standard",session:null,picked:null,reasonOrder:null};
 function buildChips(){
   var html="";
   Object.keys(CHAPTERS).forEach(function(ch){
@@ -346,44 +448,62 @@ function buildChips(){
 }
 function selectedChapters(){return Array.prototype.filter.call(document.querySelectorAll('.chapBox'),function(b){return b.checked;}).map(function(b){return +b.value;});}
 function pool(){var ch=selectedChapters();return QUESTIONS.filter(function(q){return ch.indexOf(q.chapter)>=0;});}
-// highest-difficulty unmastered questions first (random tie-break), capped at DRILL_SIZE
 function hardPool(){
   return shuffle(pool().filter(function(q){return !isMastered(q.id);}))
-    .sort(function(a,b){return difficulty(b.id)-difficulty(a.id);})
-    .slice(0,DRILL_SIZE);
+    .sort(function(a,b){return difficulty(b.id)-difficulty(a.id);}).slice(0,DRILL_SIZE);
+}
+// due questions (mastered ones included), most overdue first, then hardest
+function reviewPool(){
+  return pool().filter(function(q){return isDue(q.id);})
+    .sort(function(a,b){return (qs(a.id).srs.due-qs(b.id).srs.due)||(difficulty(b.id)-difficulty(a.id));});
 }
 function totals(){
-  var att=0,cor=0;Object.keys(DATA.questions).forEach(function(k){att+=DATA.questions[k].attempts;cor+=DATA.questions[k].correct;});
-  return {att:att,cor:cor};
+  var a=0,c=0,sh=0,ra=0,rc=0;Object.keys(DATA.questions).forEach(function(k){var s=DATA.questions[k];a+=s.attempts;c+=s.correct;sh+=s.shaky;ra+=s.reasonAttempts;rc+=s.reasonCorrect;});
+  return {att:a,cor:c,shaky:sh,ra:ra,rc:rc};
 }
+var examMinutesEdited=false;
+function refreshExamSetup(){
+  var n=pool().length, sel=$('examCount'), prev=sel.value||"20";
+  var opts=[10,20,30].filter(function(v){return v<n;}).map(function(v){return '<option value="'+v+'">'+v+'</option>';});
+  opts.push('<option value="all">All selected ('+n+')</option>');
+  sel.innerHTML=opts.join("");
+  sel.value=Array.prototype.some.call(sel.options,function(o){return o.value===prev;})?prev:(n>20?"20":"all");
+  if(!examMinutesEdited) $('examMinutes').value=Math.max(1,examCountValue());   // default ≈ 1 min per question
+  $('examMinutes').disabled=$('examUntimed').checked;
+  $('examBtn').disabled=n===0;
+}
+function examCountValue(){var v=$('examCount').value,n=pool().length;return v==="all"?n:Math.min(n,+v);}
 function refreshStart(){
-  var n=pool().length, h=hardPool().length;
+  var n=pool().length, h=hardPool().length, r=reviewPool().length;
   $('qCount').textContent=n+" question"+(n===1?"":"s")+" selected";
   $('startBtn').disabled=n===0;
   $('hardBtn').disabled=h===0;
   $('hardBtn').textContent=h?("Hardest questions ("+h+")"):"Hardest questions (all mastered!)";
+  $('reviewBtn').disabled=r===0;
+  $('reviewBtn').textContent="Review due ("+r+")";
   var t=totals(), m=pool().filter(function(q){return isMastered(q.id);}).length;
   $('statNote').textContent=(t.att?("Lifetime: "+t.att+" answers · "+Math.round(t.cor/t.att*100)+"% correct · "+m+"/"+n+" selected questions mastered. "):"")+
     (storageOK?"Progress saves automatically on this device.":"Warning: this browser is blocking local storage, so progress can't be saved.");
+  refreshExamSetup();
 }
 
+/* ================= drill quiz ================= */
 function makeItem(q,shuffleOpts){var o=[0,1,2,3];return {q:q,order:shuffleOpts?shuffle(o):o,again:false};}
 function begin(list,mode){
   if(!list.length) return;
   var shuffleOpts=$('shuffleO').checked;
-  var ordered=(mode!=="hardest"&&$('shuffleQ').checked)?shuffle(list):list.slice();
+  var ordered=(mode==="standard"||mode==="retry")&&$('shuffleQ').checked?shuffle(list):list.slice();
   S.deck=ordered.map(function(q){return makeItem(q,shuffleOpts);});
-  S.idx=0;S.score=0;S.results=[];S.mode=mode;
-  var chs=[];list.forEach(function(q){if(chs.indexOf(q.chapter)<0)chs.push(q.chapter);});chs.sort();
-  S.session={logged:false,rec:{id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),start:Date.now(),end:null,mode:mode,chapters:chs,answered:0,correct:0,score:0,byChapter:{}}};
+  S.idx=0;S.score=0;S.results=[];S.mode=mode;S.session=newSession(mode,list);
   show('quiz');renderQ();
 }
-
-/* ================= quiz ================= */
-function posText(){$('qPos').textContent="Question "+(S.idx+1)+" of "+S.deck.length+(S.mode==="hardest"?" · Hardest drill":S.mode==="retry"?" · Retry missed":"");}
+function posText(){$('qPos').textContent="Question "+(S.idx+1)+" of "+S.deck.length+(S.mode!=="standard"?" · "+MODE_LABEL[S.mode]:"");}
+function hint(){
+  $('qHint').innerHTML=S.phase==="reason"?'<kbd>1</kbd>–<kbd>4</kbd> choose a reason':S.phase==="revealed"?'<kbd>Enter</kbd> next':'<kbd>1</kbd>–<kbd>4</kbd> or <kbd>A</kbd>–<kbd>D</kbd> to answer · <kbd>Enter</kbd> next';
+}
 function renderQ(){
   var item=S.deck[S.idx], q=item.q;
-  S.answered=false;
+  S.phase="answer"; S.picked=null;
   posText();
   $('scoreLive').textContent="Score: "+S.score+" / "+S.results.length;
   $('progBar').style.width=(S.idx/S.deck.length*100)+"%";
@@ -392,79 +512,195 @@ function renderQ(){
   else if(isMastered(q.id)) tags+='<span class="tag mast">★ Mastered</span>';
   $('qTags').innerHTML=tags;
   $('qPrompt').textContent=q.prompt;
-  var html="";
-  item.order.forEach(function(orig,pos){
-    html+='<button class="opt" data-pos="'+pos+'"><span class="key">'+LETTERS[pos]+'</span><span>'+esc(q.options[orig])+'</span></button>';
-  });
-  $('qOpts').innerHTML=html;$('qOpts').classList.remove('locked');
-  Array.prototype.forEach.call($('qOpts').children,function(b){b.addEventListener('click',function(){answer(+b.dataset.pos);});});
+  $('qOpts').innerHTML=item.order.map(function(orig,pos){
+    return '<button class="opt" data-pos="'+pos+'"><span class="key">'+LETTERS[pos]+'</span><span>'+esc(q.options[orig])+'</span></button>';
+  }).join("");
+  $('qOpts').classList.remove('locked');
+  Array.prototype.forEach.call($('qOpts').children,function(b){b.addEventListener('click',function(){pick(+b.dataset.pos);});});
+  $('qReason').classList.add('hidden');
   $('qFeedback').className="feedback hidden";
   $('nextBtn').disabled=true;
   $('nextBtn').textContent=S.idx===S.deck.length-1?"See results":"Next";
+  hint();
 }
-function answer(pos){
-  if(S.answered) return;
-  S.answered=true;
-  var item=S.deck[S.idx], q=item.q, chosen=item.order[pos], ok=chosen===q.answer;
+function pick(pos){
+  if(S.phase!=="answer") return;
+  S.picked=pos;
+  if(!SETTINGS.reasoning){ reveal(null); return; }
+  S.phase="reason";
+  var q=S.deck[S.idx].q;
+  $('qOpts').children[pos].classList.add('picked'); $('qOpts').classList.add('locked');
+  S.reasonOrder=shuffle([0,1,2]).concat([-1]);   // -1 = "I guessed" (always last)
+  $('qReasonOpts').innerHTML=S.reasonOrder.map(function(ri,k){
+    return '<button class="opt'+(ri<0?' guess':'')+'" data-k="'+k+'"><span class="key">'+(k+1)+'</span><span>'+(ri<0?"I guessed":esc(q.reasons[ri]))+'</span></button>';
+  }).join("");
+  Array.prototype.forEach.call($('qReasonOpts').children,function(b){b.addEventListener('click',function(){chooseReason(+b.dataset.k);});});
+  $('qReason').classList.remove('hidden');
+  hint();
+}
+function chooseReason(k){
+  if(S.phase!=="reason") return;
+  var q=S.deck[S.idx].q, ri=S.reasonOrder[k];
+  var reason=ri<0?"guess":ri===q.reasonAnswer?"right":"wrong";
+  var btns=$('qReasonOpts').children;
+  btns[S.reasonOrder.indexOf(q.reasonAnswer)].classList.add('correct');
+  if(reason!=="right") btns[k].classList.add('wrong');
+  $('qReasonOpts').classList.add('locked');
+  reveal(reason);
+}
+function reveal(reason){
+  S.phase="revealed";
+  var item=S.deck[S.idx], q=item.q, pos=S.picked, chosen=item.order[pos], ok=chosen===q.answer;
+  var outcome=!ok?"wrong":(reason===null||reason==="right")?"correct":"shaky";
   var wasMastered=isMastered(q.id);
-  var correctPos=item.order.indexOf(q.answer);
-  var btns=$('qOpts').children;
+  var correctPos=item.order.indexOf(q.answer), btns=$('qOpts').children;
+  btns[pos].classList.remove('picked');
   btns[correctPos].classList.add('correct');
   if(!ok) btns[pos].classList.add('wrong');
   $('qOpts').classList.add('locked');
   if(ok) S.score++;
-  S.results.push({q:q,ok:ok,chosen:chosen,again:item.again});
-  recordAnswer(q.id,ok);   // saved immediately
-  var meta="";
+  S.results.push({q:q,ok:ok,outcome:outcome,reason:reason,chosen:chosen,again:item.again});
+  recordAnswer(q.id,outcome,reason,S.session); persist();   // saved immediately
+  var meta=[];
   if(!ok && S.mode==="hardest"){
-    // re-queue 3–4 positions later (or at the end) until answered correctly
-    var at=Math.min(S.deck.length,S.idx+1+3+Math.floor(Math.random()*2));
+    var at=Math.min(S.deck.length,S.idx+1+3+Math.floor(Math.random()*2));   // re-queue 3–4 positions later
     var again=makeItem(q,$('shuffleO').checked); again.again=true;
     S.deck.splice(at,0,again);
-    meta="This question will come back later in this drill.";
+    meta.push("This question will come back later in this drill.");
   }
-  if(ok&&!wasMastered&&isMastered(q.id)) meta="★ Mastered — "+MASTERY_STREAK+" correct in a row!";
-  if(!ok&&wasMastered) meta=(meta?meta+" ":"")+"Removed from mastered.";
+  if(outcome==="correct"&&!wasMastered&&isMastered(q.id)) meta.push("★ Mastered — "+MASTERY_STREAK+" correct in a row!");
+  if(!ok&&wasMastered) meta.push("Removed from mastered.");
+  if(outcome==="shaky") meta.push("Shaky corrects don't build your mastery streak, and the question comes back sooner.");
+  var s=qs(q.id); if(s&&s.srs) meta.push("Next review: "+dueLabel(q.id).replace("due ","")+".");
+  var head=outcome==="correct"?(reason?"✓ Correct — and your reasoning is right!":"✓ Correct!"):
+           outcome==="shaky"?(reason==="guess"?"≈ Correct answer, but you guessed.":"≈ Correct answer, but not the right reasoning."):
+           "✗ Incorrect — the answer is "+LETTERS[correctPos]+".";
   var fb=$('qFeedback');
-  fb.className="feedback "+(ok?"ok":"bad");
-  fb.innerHTML='<strong>'+(ok?"✓ Correct!":"✗ Incorrect — the answer is "+LETTERS[correctPos]+".")+'</strong>'+esc(q.explanation)+(meta?'<div class="meta">'+esc(meta)+'</div>':'');
+  fb.className="feedback "+(outcome==="correct"?"ok":outcome==="shaky"?"shaky":"bad");
+  fb.innerHTML='<strong>'+head+'</strong>'+esc(q.explanation)+(reason&&reason!=="right"?'<div class="meta"><b>Reasoning:</b> '+esc(q.reasons[q.reasonAnswer])+'</div>':'')+(meta.length?'<div class="meta">'+esc(meta.join(" "))+'</div>':'');
   posText();
   $('scoreLive').textContent="Score: "+S.score+" / "+S.results.length;
   $('progBar').style.width=((S.idx+1)/S.deck.length*100)+"%";
   $('nextBtn').textContent=S.idx===S.deck.length-1?"See results":"Next";
   $('nextBtn').disabled=false;$('nextBtn').focus({preventScroll:true});
+  hint();
 }
 function next(){
-  if(!S.answered) return;
+  if(S.phase!=="revealed") return;
   if(S.idx<S.deck.length-1){S.idx++;renderQ();}else finish();
 }
 
-/* ================= end ================= */
-function missedUnique(){
-  var seen={},out=[];
-  S.results.forEach(function(x){if(!x.ok&&!seen[x.q.id]){seen[x.q.id]=1;out.push(x);}});
-  return out;
-}
-function finish(){
-  var total=S.results.length;
-  var pct=total?Math.round(S.score/total*100):0;
-  $('finalPct').textContent=pct+"%";
-  $('finalRaw').textContent=S.score+" of "+total+" answers correct";
+/* ================= drill end ================= */
+function uniqueBy(list,pred){var seen={},out=[];list.forEach(function(x){if(pred(x)&&!seen[x.q.id]){seen[x.q.id]=1;out.push(x);}});return out;}
+var LAST_MISSED=[];
+function chapterRows(res){
   var rows='<tr><th>Chapter</th><th>Score</th><th style="width:40%"></th></tr>';
   Object.keys(CHAPTERS).forEach(function(ch){
-    var r=S.results.filter(function(x){return x.q.chapter==ch;}); if(!r.length) return;
+    var r=res.filter(function(x){return x.q.chapter==ch;}); if(!r.length) return;
     var c=r.filter(function(x){return x.ok;}).length, p=Math.round(c/r.length*100);
     rows+='<tr><td>Ch '+ch+' · '+esc(CHAPTERS[ch])+'</td><td>'+c+'/'+r.length+' ('+p+'%)</td><td><div class="bar"><div style="width:'+p+'%"></div></div></td></tr>';
   });
-  $('chapTable').innerHTML=rows;
-  var missed=missedUnique();
+  return rows;
+}
+function finish(){
+  var total=S.results.length, pct=total?Math.round(S.score/total*100):0;
+  var shaky=S.results.filter(function(x){return x.outcome==="shaky";}).length;
+  $('endTitle').textContent="Results"+(S.mode!=="standard"?" · "+MODE_LABEL[S.mode]:"");
+  $('endNotice').innerHTML="";
+  $('finalPct').textContent=pct+"%";
+  $('finalRaw').textContent=S.score+" of "+total+" answers correct"+(shaky?" ("+shaky+" shaky)":"");
+  $('chapTable').innerHTML=chapterRows(S.results);
+  var missed=uniqueBy(S.results,function(x){return !x.ok;});
+  LAST_MISSED=missed.map(function(x){return x.q;});
+  $('missedTitle').textContent="Missed questions";
   $('missedWrap').classList.toggle('hidden',!missed.length);
+  $('missedList').className="missed";
   $('missedList').innerHTML=missed.map(function(x){
     var fixed=S.results.some(function(r){return r.q.id===x.q.id&&r.ok;});
     return '<li><div class="q">'+esc(x.q.prompt)+'</div><div class="y">Your answer: '+esc(x.q.options[x.chosen])+(fixed?' <span class="muted">(later answered correctly)</span>':'')+'</div><div class="a">✓ '+esc(x.q.options[x.q.answer])+'</div><div class="e">'+esc(x.q.explanation)+'</div></li>';
   }).join("");
-  $('retryBtn').disabled=!missed.length;
-  $('retryBtn').textContent=missed.length?("Retry missed only ("+missed.length+")"):"Retry missed only";
+  var sh=uniqueBy(S.results,function(x){return x.outcome==="shaky";});
+  $('shakyWrap').classList.toggle('hidden',!sh.length);
+  $('shakyList').innerHTML=sh.map(function(x){
+    return '<li><div class="q">'+esc(x.q.prompt)+'</div><div class="a">✓ '+esc(x.q.options[x.q.answer])+'</div><div class="e"><b>Why:</b> '+esc(x.q.reasons[x.q.reasonAnswer])+(x.reason==="guess"?' <span class="muted">(you guessed)</span>':'')+'</div></li>';
+  }).join("");
+  setRetry();
+  show('end');
+}
+function setRetry(){
+  $('retryBtn').disabled=!LAST_MISSED.length;
+  $('retryBtn').textContent=LAST_MISSED.length?("Retry missed only ("+LAST_MISSED.length+")"):"Retry missed only";
+}
+
+/* ================= exam mode ================= */
+var E=null;
+function startExam(){
+  var list=pool(); if(!list.length) return;
+  var n=examCountValue(), shuffleOpts=$('shuffleO').checked;
+  var chosen=shuffle(list).slice(0,n);
+  var untimed=$('examUntimed').checked, mins=Math.max(1,Math.min(240,+$('examMinutes').value||n));
+  E={items:chosen.map(function(q){var it=makeItem(q,shuffleOpts);it.chosen=null;it.flagged=false;return it;}),
+     idx:0,start:now(),limitSec:untimed?null:mins*60,endAt:untimed?null:now()+mins*60000,timer:null,submitted:false};
+  E.timer=setInterval(tickExam,250);
+  show('exam');renderExam();tickExam();
+}
+function tickExam(){
+  if(!E||E.submitted) return;
+  if(E.endAt===null){ $('exTimer').textContent="⏱ "+fmtClock((now()-E.start)/1000); $('exTimer').classList.remove('low'); return; }
+  var rem=(E.endAt-now())/1000;
+  $('exTimer').textContent="⏳ "+fmtClock(Math.ceil(rem));
+  $('exTimer').classList.toggle('low',rem<=60);
+  if(rem<=0) submitExam(true);
+}
+function renderExam(){
+  var it=E.items[E.idx], q=it.q, answered=E.items.filter(function(x){return x.chosen!==null;}).length;
+  $('exPos').textContent="Exam · Question "+(E.idx+1)+" of "+E.items.length+" · "+answered+" answered";
+  $('exNav').innerHTML=E.items.map(function(x,i){return '<button data-i="'+i+'" class="'+(x.chosen!==null?'ans ':'')+(x.flagged?'flag ':'')+(i===E.idx?'cur':'')+'" title="Question '+(i+1)+(x.flagged?' (flagged)':'')+'">'+(i+1)+'</button>';}).join("");
+  Array.prototype.forEach.call($('exNav').children,function(b){b.onclick=function(){E.idx=+b.dataset.i;renderExam();};});
+  $('exTags').innerHTML='<span class="tag">Chapter '+q.chapter+' · '+CHAPTERS[q.chapter]+'</span>'+(it.flagged?'<span class="tag shaky" style="background:#fffbeb">⚑ Flagged</span>':'');
+  $('exPrompt').textContent=q.prompt;
+  $('exOpts').innerHTML=it.order.map(function(orig,pos){return '<button class="opt'+(it.chosen===pos?' picked':'')+'" data-pos="'+pos+'"><span class="key">'+LETTERS[pos]+'</span><span>'+esc(q.options[orig])+'</span></button>';}).join("");
+  Array.prototype.forEach.call($('exOpts').children,function(b){b.onclick=function(){examChoose(+b.dataset.pos);};});
+  $('exPrev').disabled=E.idx===0; $('exNext').disabled=E.idx===E.items.length-1;
+  $('exFlag').classList.toggle('flagged',it.flagged); $('exFlag').textContent=it.flagged?"⚑ Flagged":"⚑ Flag";
+}
+function examChoose(pos){var it=E.items[E.idx]; it.chosen=(it.chosen===pos?null:pos); renderExam();}   // click again to clear
+function examMove(d){var n=E.idx+d; if(n>=0&&n<E.items.length){E.idx=n;renderExam();}}
+function examFlag(){var it=E.items[E.idx];it.flagged=!it.flagged;renderExam();}
+function submitExam(auto){
+  if(!E||E.submitted) return;
+  if(!auto){
+    var un=E.items.filter(function(x){return x.chosen===null;}).length, fl=E.items.filter(function(x){return x.flagged;}).length;
+    if((un||fl)&&!confirm("Submit exam?"+(un?"\n• "+un+" unanswered (counted wrong)":"")+(fl?"\n• "+fl+" still flagged":""))) return;
+  }
+  E.submitted=true; clearInterval(E.timer);
+  var t=now(), used=Math.round(((E.endAt!==null?Math.min(t,E.endAt):t)-E.start)/1000);
+  var sess=newSession("exam",E.items.map(function(x){return x.q;}));
+  var res=E.items.map(function(it,i){
+    var chosen=it.chosen===null?null:it.order[it.chosen], ok=chosen===it.q.answer;
+    recordAnswer(it.q.id,ok?"correct":"wrong",null,sess,t+i);   // exam answers feed tracking + spaced review
+    return {q:it.q,ok:ok,chosen:chosen,flagged:it.flagged};
+  });
+  var r=sess.rec; r.total=E.items.length; r.timeLimitSec=E.limitSec; r.timeUsedSec=used; r.autoSubmitted=!!auto;
+  r.unanswered=res.filter(function(x){return x.chosen===null;}).length; r.flagged=res.filter(function(x){return x.flagged;}).length;
+  persist();
+  var c=res.filter(function(x){return x.ok;}).length, pct=Math.round(c/res.length*100);
+  $('endTitle').textContent="Exam results";
+  $('endNotice').innerHTML=auto?'<div class="notice">⏰ Time ran out — your exam was submitted automatically.</div>':'';
+  $('finalPct').textContent=pct+"%";
+  $('finalRaw').textContent=c+" of "+res.length+" correct · time used "+fmtClock(used)+(E.limitSec?" of "+fmtClock(E.limitSec):" (untimed)")+(r.unanswered?" · "+r.unanswered+" unanswered":"");
+  $('chapTable').innerHTML=chapterRows(res);
+  $('missedTitle').textContent="Review every question";
+  $('missedWrap').classList.remove('hidden'); $('shakyWrap').classList.add('hidden');
+  $('missedList').className="missed review";
+  $('missedList').innerHTML=res.map(function(x,i){
+    return '<li class="'+(x.ok?'right':'wrongq')+'"><div class="q">'+(i+1)+'. '+esc(x.q.prompt)+(x.flagged?' <span class="tag shaky" style="background:#fffbeb;margin:0">⚑ flagged</span>':'')+'</div>'+
+      (x.ok?'<div class="a">✓ Your answer: '+esc(x.q.options[x.chosen])+'</div>':
+       '<div class="y">✗ Your answer: '+(x.chosen===null?'<i>no answer</i>':esc(x.q.options[x.chosen]))+'</div><div class="a">✓ Correct: '+esc(x.q.options[x.q.answer])+'</div>')+
+      '<div class="e">'+esc(x.q.explanation)+'</div></li>';
+  }).join("");
+  LAST_MISSED=res.filter(function(x){return !x.ok;}).map(function(x){return x.q;});
+  setRetry(); $('retryBtn').textContent=LAST_MISSED.length?"Drill missed ("+LAST_MISSED.length+")":"Drill missed";
   show('end');
 }
 
@@ -473,12 +709,17 @@ function studyStreak(){
   var days={};
   DATA.sessions.forEach(function(s){days[dayKey(s.start)]=1;if(s.end)days[dayKey(s.end)]=1;});
   Object.keys(DATA.questions).forEach(function(k){DATA.questions[k].history.forEach(function(h){days[dayKey(h.t)]=1;});});
-  var d=new Date(); d.setHours(12,0,0,0);
-  if(!days[dayKey(d)]) d.setDate(d.getDate()-1);   // streak still alive if you studied yesterday
+  var d=new Date(now()); d.setHours(12,0,0,0);
+  if(!days[dayKey(d)]) d.setDate(d.getDate()-1);
   var n=0; while(days[dayKey(d)]){n++;d.setDate(d.getDate()-1);}
   return n;
 }
-function dotsHTML(h){return '<span class="dots">'+h.map(function(x){return '<span class="dot '+(x.ok?"y":"n")+'" title="'+(x.ok?"Correct":"Missed")+' · '+esc(fmtDate(x.t))+'"></span>';}).join("")+'</span>';}
+function dueCounts(){
+  var endToday=addDays(now(),1)-1, endWeek=addDays(now(),7)-1, today=0, week=0, fresh=0;
+  QUESTIONS.forEach(function(q){var s=qs(q.id); if(!s||!s.srs){fresh++;return;} if(s.srs.due<=endToday)today++; if(s.srs.due<=endWeek)week++;});
+  return {today:today,week:week,fresh:fresh};
+}
+function dotsHTML(h){return '<span class="dots">'+h.map(function(x){var c=x.ok?(x.s?"s":"y"):"n";return '<span class="dot '+c+'" title="'+(x.ok?(x.s?"Shaky correct":"Correct"):"Missed")+' · '+esc(fmtDate(x.t))+'"></span>';}).join("")+'</span>';}
 function chartSVG(){
   var ss=DATA.sessions.slice(-30);
   if(!ss.length) return '<div class="muted" style="font-size:.9rem">No sessions yet — finish a few questions to see your trend.</div>';
@@ -486,31 +727,44 @@ function chartSVG(){
   var x=function(i){return ss.length===1?L+iw/2:L+i*iw/(ss.length-1);}, y=function(p){return T+ih-(p/100)*ih;};
   var g='';
   [0,25,50,75,100].forEach(function(p){g+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y(p)+'" y2="'+y(p)+'" stroke="#eef0f4"/><text x="'+(L-6)+'" y="'+(y(p)+4)+'" font-size="11" text-anchor="end" fill="#9ca3af">'+p+'%</text>';});
-  var pts=ss.map(function(s,i){return x(i).toFixed(1)+","+y(s.score).toFixed(1);});
-  var area='<path d="M'+x(0).toFixed(1)+','+y(0)+' L'+pts.join(' L')+' L'+x(ss.length-1).toFixed(1)+','+y(0)+' Z" fill="#2563eb" opacity=".08"/>';
-  var line='<polyline points="'+pts.join(' ')+'" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linejoin="round"/>';
-  var dots=ss.map(function(s,i){var col=s.score>=80?"#15803d":s.score>=60?"#b45309":"#b91c1c";return '<circle cx="'+x(i).toFixed(1)+'" cy="'+y(s.score).toFixed(1)+'" r="4.5" fill="#fff" stroke="'+col+'" stroke-width="2.5"><title>'+esc(fmtDate(s.start))+' · '+s.mode+' · '+s.correct+'/'+s.answered+' ('+s.score+'%)</title></circle>';}).join("");
+  var drill=[],exam=[];
+  ss.forEach(function(s,i){(s.mode==="exam"?exam:drill).push(x(i).toFixed(1)+","+y(s.score).toFixed(1));});
+  var lines=(drill.length>1?'<polyline points="'+drill.join(' ')+'" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linejoin="round" opacity=".85"/>':'')+
+            (exam.length>1?'<polyline points="'+exam.join(' ')+'" fill="none" stroke="#7c3aed" stroke-width="2" stroke-dasharray="6 4"/>':'');
+  var marks=ss.map(function(s,i){
+    var cx=x(i),cy=y(s.score),tip='<title>'+esc(fmtDate(s.start))+' · '+MODE_LABEL[s.mode||"standard"]+' · '+s.correct+'/'+s.answered+' ('+s.score+'%)'+(s.mode==="exam"&&s.timeUsedSec!=null?' · '+fmtClock(s.timeUsedSec):'')+'</title>';
+    if(s.mode==="exam") return '<rect class="exam-pt" x="'+(cx-6).toFixed(1)+'" y="'+(cy-6).toFixed(1)+'" width="12" height="12" transform="rotate(45 '+cx.toFixed(1)+' '+cy.toFixed(1)+')" fill="#7c3aed" stroke="#fff" stroke-width="1.5">'+tip+'</rect>';
+    var col=s.score>=80?"#15803d":s.score>=60?"#b45309":"#b91c1c";
+    return '<circle class="drill-pt" cx="'+cx.toFixed(1)+'" cy="'+cy.toFixed(1)+'" r="4.5" fill="#fff" stroke="'+col+'" stroke-width="2.5">'+tip+'</circle>';
+  }).join("");
   var lbl='<text x="'+L+'" y="'+(H-8)+'" font-size="11" fill="#9ca3af">'+esc(new Date(ss[0].start).toLocaleDateString([], {month:"short",day:"numeric"}))+'</text><text x="'+(W-R)+'" y="'+(H-8)+'" font-size="11" text-anchor="end" fill="#9ca3af">'+esc(new Date(ss[ss.length-1].start).toLocaleDateString([], {month:"short",day:"numeric"}))+' · last '+ss.length+' session'+(ss.length>1?'s':'')+'</text>';
-  return '<svg class="chart" id="sessionChart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Session scores over time">'+g+area+line+dots+lbl+'</svg>';
+  return '<svg class="chart" id="sessionChart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Session scores over time">'+g+lines+marks+lbl+'</svg>'+
+    '<div class="legend"><span><svg width="14" height="14"><circle cx="7" cy="7" r="4.5" fill="#fff" stroke="#2563eb" stroke-width="2.5"/></svg>Drill sessions</span><span><svg width="14" height="14"><rect x="3" y="3" width="8" height="8" transform="rotate(45 7 7)" fill="#7c3aed"/></svg>Exams</span></div>';
 }
 function renderStats(){
-  var t=totals(), mastered=QUESTIONS.filter(function(q){return isMastered(q.id);}).length;
-  var tiles=[[t.att,"Questions answered"],[t.att?Math.round(t.cor/t.att*100)+"%":"—","Overall accuracy"],[DATA.sessions.length,"Sessions"],[studyStreak()+" 🔥","Study streak (days)"],[mastered+"/"+QUESTIONS.length,"Mastered"]];
-  $('tiles').innerHTML=tiles.map(function(x){return '<div class="tile"><div class="v">'+x[0]+'</div><div class="l">'+x[1]+'</div></div>';}).join("");
-  var rows='<tr><th>Chapter</th><th>Accuracy</th><th>Mastered</th><th style="width:30%"></th></tr>';
+  var t=totals(), mastered=QUESTIONS.filter(function(q){return isMastered(q.id);}).length, dc=dueCounts();
+  var exams=DATA.sessions.filter(function(s){return s.mode==="exam";});
+  var tiles=[[t.att,"Questions answered"],[t.att?Math.round(t.cor/t.att*100)+"%":"—","Overall accuracy"],
+    [t.ra?Math.round(t.rc/t.ra*100)+"%":"—","Reasoning accuracy"+(t.ra?" ("+t.rc+"/"+t.ra+")":"")],
+    [DATA.sessions.length,"Sessions"+(exams.length?" ("+exams.length+" exam"+(exams.length>1?"s":"")+")":"")],[studyStreak()+" 🔥","Study streak (days)"],
+    [mastered+"/"+QUESTIONS.length,"Mastered"],[dc.today,"Due today"],[dc.week,"Due this week"],[dc.fresh,"New (unseen)"]];
+  $('tiles').innerHTML=tiles.map(function(x,i){return '<div class="tile" data-tile="'+i+'"><div class="v">'+x[0]+'</div><div class="l">'+x[1]+'</div></div>';}).join("");
+  var rows='<tr><th>Chapter</th><th>Accuracy</th><th>Reasoning</th><th>Mastered</th><th>Due</th><th style="width:20%"></th></tr>';
+  var endToday=addDays(now(),1)-1;
   Object.keys(CHAPTERS).forEach(function(ch){
-    var qsIn=QUESTIONS.filter(function(q){return q.chapter==ch;}),a=0,c=0,m=0;
-    qsIn.forEach(function(q){var s=qs(q.id);if(s){a+=s.attempts;c+=s.correct;}if(isMastered(q.id))m++;});
+    var qsIn=QUESTIONS.filter(function(q){return q.chapter==ch;}),a=0,c=0,m=0,ra=0,rc=0,du=0;
+    qsIn.forEach(function(q){var s=qs(q.id);if(s){a+=s.attempts;c+=s.correct;ra+=s.reasonAttempts;rc+=s.reasonCorrect;if(s.srs&&s.srs.due<=endToday)du++;}if(isMastered(q.id))m++;});
     var p=a?Math.round(c/a*100):0;
-    rows+='<tr><td>Ch '+ch+' · '+esc(CHAPTERS[ch])+'</td><td>'+(a?p+'% <span class="muted">('+c+'/'+a+')</span>':'<span class="muted">—</span>')+'</td><td>'+m+'/'+qsIn.length+'</td><td><div class="bar"><div style="width:'+p+'%"></div></div></td></tr>';
+    rows+='<tr><td>Ch '+ch+' · '+esc(CHAPTERS[ch])+'</td><td>'+(a?p+'% <span class="muted">('+c+'/'+a+')</span>':'<span class="muted">—</span>')+'</td><td>'+(ra?Math.round(rc/ra*100)+'%':'<span class="muted">—</span>')+'</td><td>'+m+'/'+qsIn.length+'</td><td>'+du+'</td><td><div class="bar"><div style="width:'+p+'%"></div></div></td></tr>';
   });
   $('statChap').innerHTML=rows;
   $('chartWrap').innerHTML=chartSVG();
   var ranked=QUESTIONS.filter(function(q){var s=qs(q.id);return s&&s.attempts>0;})
     .sort(function(a,b){return (difficulty(b.id)-difficulty(a.id))||(qs(b.id).attempts-qs(a.id).attempts);}).slice(0,15);
+  $('hardList').style.counterReset="";
   $('hardList').innerHTML=ranked.length?ranked.map(function(q){
     var s=qs(q.id),acc=Math.round(s.correct/s.attempts*100);
-    return '<li data-qid="'+q.id+'"><div class="q">'+esc(q.prompt)+'</div><div class="m"><span>Ch '+q.chapter+'</span><span><b>'+acc+'%</b> accuracy</span><span>'+s.attempts+' attempt'+(s.attempts>1?'s':'')+'</span>'+(s.history.length?dotsHTML(s.history):'<span>no recent history</span>')+(isMastered(q.id)?'<span class="tag mast" style="margin:0">★ Mastered</span>':'')+'</div><div class="a">✓ '+esc(q.options[q.answer])+'</div><details><summary>Explanation</summary><p>'+esc(q.explanation)+'</p></details></li>';
+    return '<li data-qid="'+q.id+'"><div class="q">'+esc(q.prompt)+'</div><div class="m"><span>Ch '+q.chapter+'</span><span><b>'+acc+'%</b> accuracy</span><span>'+s.attempts+' attempt'+(s.attempts>1?'s':'')+'</span>'+(s.reasonAttempts?'<span>reasoning '+s.reasonCorrect+'/'+s.reasonAttempts+'</span>':'')+(s.history.length?dotsHTML(s.history):'<span>no recent history</span>')+'<span>'+dueLabel(q.id)+'</span>'+(isMastered(q.id)?'<span class="tag mast" style="margin:0">★ Mastered</span>':'')+'</div><div class="a">✓ '+esc(q.options[q.answer])+'</div><details><summary>Explanation</summary><p>'+esc(q.explanation)+'</p><p><b>Why:</b> '+esc(q.reasons[q.reasonAnswer])+'</p></details></li>';
   }).join(""):'<li style="padding-left:12px" class="muted">No answers recorded yet.</li>';
   if(!ranked.length) $('hardList').style.counterReset="none";
   $('exportPanel').classList.add('hidden');$('importPanel').classList.add('hidden');
@@ -520,7 +774,7 @@ function openStats(){renderStats();show('stats');}
 /* ================= export / import ================= */
 function toB64(str){var bytes=new TextEncoder().encode(str),bin="";for(var i=0;i<bytes.length;i+=0x8000)bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000));return btoa(bin);}
 function fromB64(b64){var bin=atob(b64),bytes=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);return new TextDecoder().decode(bytes);}
-function exportPayload(){var d=JSON.parse(JSON.stringify(DATA));d.exportId=Date.now().toString(36)+Math.random().toString(36).slice(2,8);d.exportedAt=Date.now();d.app="econ202-quiz";return d;}
+function exportPayload(){var d=JSON.parse(JSON.stringify(DATA));d.exportId=now().toString(36)+Math.random().toString(36).slice(2,8);d.exportedAt=now();d.app="econ202-quiz";return d;}
 function parseImport(text){
   text=(text||"").trim(); if(!text) throw new Error("Paste a code or choose a file first.");
   var obj;
@@ -533,20 +787,23 @@ function mergeData(a,b){
   var out=normalize(JSON.parse(JSON.stringify(a)));
   Object.keys(b.questions).forEach(function(id){
     var x=out.questions[id]||blankQ(), y=b.questions[id], seen={};
-    var hist=x.history.concat(y.history).filter(function(h){var k=h.t+":"+h.ok;if(seen[k])return false;seen[k]=1;return true;}).sort(function(p,q){return p.t-q.t;});
-    var run=0;for(var i=hist.length-1;i>=0&&hist[i].ok;i--)run++;
+    var hist=x.history.concat(y.history).filter(function(h){var k=h.t+":"+h.ok+":"+!!h.s;if(seen[k])return false;seen[k]=1;return true;}).sort(function(p,q){return p.t-q.t;});
+    // streak from the combined timeline: count truly-correct answers back to the last miss (shaky neither builds nor breaks)
+    var run=0,hitMiss=false;for(var i=hist.length-1;i>=0;i--){if(!hist[i].ok){hitMiss=true;break;}if(!hist[i].s)run++;}
     var m=blankQ();
-    m.attempts=x.attempts+y.attempts; m.correct=x.correct+y.correct;
+    m.attempts=x.attempts+y.attempts; m.correct=x.correct+y.correct; m.shaky=x.shaky+y.shaky;
+    m.reasonAttempts=x.reasonAttempts+y.reasonAttempts; m.reasonCorrect=x.reasonCorrect+y.reasonCorrect;
     m.history=hist.slice(-HISTORY_N);
-    // streak: from the combined timeline; if the run covers all known history, keep the longer stored streak
-    m.streak=hist.length?(run===hist.length?Math.max(run,x.streak,y.streak):run):Math.max(x.streak,y.streak);
+    m.streak=hist.length?(hitMiss?run:Math.max(run,x.streak,y.streak)):Math.max(x.streak,y.streak);
     m.lastSeen=Math.max(x.lastSeen||0,y.lastSeen||0)||null;
+    // spaced-review schedule: keep the one from the most recent review
+    m.srs=(y.srs&&(!x.srs||(y.lastSeen||0)>(x.lastSeen||0)))?y.srs:x.srs;
     out.questions[id]=m;
   });
   var ids={};out.sessions.forEach(function(s){ids[s.id]=1;});
   b.sessions.forEach(function(s){if(!ids[s.id])out.sessions.push(s);});
   out.sessions.sort(function(p,q){return p.start-q.start;});
-  out.createdAt=Math.min(a.createdAt||Date.now(),b.createdAt||Date.now());
+  out.createdAt=Math.min(a.createdAt||now(),b.createdAt||now());
   return out;
 }
 function importMsg(t,ok){$('importMsg').textContent=t;$('importMsg').className="msg "+(ok?"ok":"bad");}
@@ -566,15 +823,26 @@ function doImport(mode){
 }
 
 /* ================= wiring ================= */
+$('reasonToggle').checked=!!SETTINGS.reasoning;
+$('reasonToggle').onchange=function(){SETTINGS.reasoning=this.checked;saveSettings();};
 $('startBtn').onclick=function(){begin(pool(),"standard");};
 $('hardBtn').onclick=function(){begin(hardPool(),"hardest");};
+$('reviewBtn').onclick=function(){begin(reviewPool(),"review");};
 $('statsBtn').onclick=openStats;
 $('endStatsBtn').onclick=openStats;
 $('statsBack').onclick=function(){show('start');refreshStart();};
 $('nextBtn').onclick=next;
 $('quitBtn').onclick=function(){if(!S.results.length){show('start');refreshStart();}else finish();};
-$('retryBtn').onclick=function(){begin(missedUnique().map(function(x){return x.q;}),"retry");};
+$('retryBtn').onclick=function(){begin(LAST_MISSED.slice(),"retry");};
 $('restartBtn').onclick=function(){show('start');refreshStart();};
+$('examCount').onchange=function(){refreshExamSetup();};
+$('examMinutes').oninput=function(){examMinutesEdited=true;};
+$('examUntimed').onchange=refreshExamSetup;
+$('examBtn').onclick=startExam;
+$('exPrev').onclick=function(){examMove(-1);};
+$('exNext').onclick=function(){examMove(1);};
+$('exFlag').onclick=examFlag;
+$('exSubmit').onclick=function(){submitExam(false);};
 $('exportBtn').onclick=function(){
   $('importPanel').classList.add('hidden');
   $('exportCode').value="ECON202:"+toB64(JSON.stringify(exportPayload()));
@@ -588,7 +856,7 @@ $('copyBtn').onclick=function(){
 };
 $('downloadBtn').onclick=function(){
   var blob=new Blob([JSON.stringify(exportPayload(),null,1)],{type:"application/json"});
-  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download="econ202-progress-"+dayKey(Date.now())+".json";
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download="econ202-progress-"+dayKey(now())+".json";
   document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},1000);
 };
 $('importBtn').onclick=function(){$('exportPanel').classList.add('hidden');$('importPanel').classList.remove('hidden');$('importMsg').textContent="";};
@@ -600,23 +868,32 @@ $('importFile').onchange=function(e){
 $('importMerge').onclick=function(){doImport("merge");};
 $('importReplace').onclick=function(){doImport("replace");};
 $('resetBtn').onclick=function(){
-  if(!confirm("Reset ALL saved progress (attempts, history, sessions, mastery)? Consider exporting a backup first. This can't be undone.")) return;
+  if(!confirm("Reset ALL saved progress (attempts, history, sessions, mastery, review schedule)? Consider exporting a backup first. This can't be undone.")) return;
   DATA=blank(); persist(); try{localStorage.removeItem(KEY_V1);}catch(e){} renderStats();
 };
 
 document.addEventListener('keydown',function(e){
   if(e.ctrlKey||e.metaKey||e.altKey) return;
-  if($('quiz').classList.contains('hidden')) return;
-  var tg=e.target&&e.target.tagName; if(tg==="TEXTAREA"||tg==="INPUT") return;
-  var k=e.key;
+  var tg=e.target&&e.target.tagName; if(tg==="TEXTAREA"||tg==="INPUT"||tg==="SELECT") return;
+  var k=e.key, lk=k.toLowerCase();
   var map={"1":0,"2":1,"3":2,"4":3,"a":0,"b":1,"c":2,"d":3};
-  var p=map[k.toLowerCase()];
-  if(p!==undefined&&!S.answered){e.preventDefault();answer(p);return;}
-  if((k==="Enter"||k===" ")&&S.answered){e.preventDefault();next();}
+  if(!$('exam').classList.contains('hidden')&&E&&!E.submitted){
+    if(map[lk]!==undefined){e.preventDefault();examChoose(map[lk]);}
+    else if(k==="ArrowRight"||k==="Enter"){e.preventDefault();examMove(1);}
+    else if(k==="ArrowLeft"){e.preventDefault();examMove(-1);}
+    else if(lk==="f"){e.preventDefault();examFlag();}
+    else if(k===" ") e.preventDefault();
+    return;
+  }
+  if($('quiz').classList.contains('hidden')) return;
+  var p=map[lk];
+  if(p!==undefined&&S.phase==="answer"){e.preventDefault();pick(p);return;}
+  if(p!==undefined&&S.phase==="reason"){e.preventDefault();chooseReason(p);return;}
+  if((k==="Enter"||k===" ")&&S.phase==="revealed"){e.preventDefault();next();}
   else if(k===" "||k==="Enter") e.preventDefault();
 });
 
-window.__econQuiz={questions:QUESTIONS,state:S,data:function(){return DATA;},difficulty:difficulty,isMastered:isMastered,hardPool:hardPool,KEY:KEY,KEY_V1:KEY_V1};
+window.__econQuiz={questions:QUESTIONS,state:S,exam:function(){return E;},data:function(){return DATA;},settings:SETTINGS,difficulty:difficulty,isMastered:isMastered,isDue:isDue,hardPool:hardPool,reviewPool:reviewPool,dueCounts:dueCounts,KEY:KEY,KEY_V1:KEY_V1,LADDER:LADDER};
 buildChips();refreshStart();
 })();
 </script>
