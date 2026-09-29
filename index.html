@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="econ202-build" content="v2-progress-tracking">
 <title>ECON 202 Quiz — Ch 1, 2, 3, 6</title>
 <style>
-:root{--bg:#f5f7fb;--card:#fff;--ink:#1f2937;--muted:#6b7280;--line:#e5e7eb;--accent:#2563eb;--accent-soft:#eff4ff;--ok:#15803d;--ok-bg:#ecfdf3;--bad:#b91c1c;--bad-bg:#fef2f2;--radius:14px}
+:root{--bg:#f5f7fb;--card:#fff;--ink:#1f2937;--muted:#6b7280;--line:#e5e7eb;--accent:#2563eb;--accent-soft:#eff4ff;--ok:#15803d;--ok-bg:#ecfdf3;--bad:#b91c1c;--bad-bg:#fef2f2;--warn:#b45309;--radius:14px}
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
 .wrap{max-width:760px;margin:0 auto;padding:20px 16px 48px}
@@ -14,6 +15,7 @@ header h1{font-size:1.25rem;margin:0}
 header .sub{color:var(--muted);font-size:.9rem}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:0 1px 3px rgba(0,0,0,.04),0 6px 24px rgba(15,23,42,.05)}
 h2{margin:0 0 12px;font-size:1.3rem}
+h3{margin:22px 0 8px;font-size:1.05rem}
 .muted{color:var(--muted)}
 .hidden{display:none!important}
 .chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:12px 0 18px}
@@ -30,12 +32,15 @@ button{font:inherit;border-radius:10px;border:1px solid var(--line);background:#
 button:hover:not(:disabled):not(.correct):not(.wrong){border-color:#c7d2fe;background:#f8faff}
 button.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
 button.primary:hover:not(:disabled){background:#1d4ed8}
+button.danger{color:var(--bad);border-color:#fecaca}
 button:disabled{opacity:.45;cursor:not-allowed}
 button.link{border:none;background:none;color:var(--muted);padding:6px 4px;text-decoration:underline;font-size:.88rem}
 .topbar{display:flex;justify-content:space-between;align-items:center;font-size:.9rem;color:var(--muted);margin-bottom:8px}
 .progress{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin-bottom:18px}
 .progress>div{height:100%;background:var(--accent);width:0;transition:width .25s}
-.tag{display:inline-block;font-size:.75rem;font-weight:600;letter-spacing:.02em;color:var(--accent);background:var(--accent-soft);border-radius:99px;padding:3px 10px;margin-bottom:10px}
+.tag{display:inline-block;font-size:.75rem;font-weight:600;letter-spacing:.02em;color:var(--accent);background:var(--accent-soft);border-radius:99px;padding:3px 10px;margin:0 6px 10px 0}
+.tag.again{color:var(--warn);background:#fff7ed}
+.tag.mast{color:var(--ok);background:var(--ok-bg)}
 .prompt{font-size:1.15rem;font-weight:600;margin:0 0 16px}
 .opts{display:flex;flex-direction:column;gap:10px}
 .opt{display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;padding:12px 14px;border-radius:10px;border:1.5px solid var(--line);background:#fff}
@@ -50,12 +55,13 @@ button.link{border:none;background:none;color:var(--muted);padding:6px 4px;text-
 .feedback.ok{background:var(--ok-bg);border-color:var(--ok)}
 .feedback.bad{background:var(--bad-bg);border-color:var(--bad)}
 .feedback strong{display:block;margin-bottom:4px}
+.feedback .meta{font-size:.82rem;color:var(--muted);margin-top:6px}
 .nextrow{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:10px}
 .hint{font-size:.8rem;color:var(--muted)}
 kbd{font:600 .75rem ui-monospace,monospace;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 5px;background:#fff}
 .big{font-size:3rem;font-weight:800;margin:4px 0}
 .breakdown{width:100%;border-collapse:collapse;margin:10px 0 18px}
-.breakdown td,.breakdown th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left}
+.breakdown td,.breakdown th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
 .breakdown th{font-size:.8rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
 .bar{height:6px;background:var(--line);border-radius:99px;overflow:hidden;min-width:60px}
 .bar>div{height:100%;background:var(--ok)}
@@ -66,7 +72,29 @@ kbd{font:600 .75rem ui-monospace,monospace;border:1px solid var(--line);border-b
 .missed .y{color:var(--bad);font-size:.9rem}
 .missed .e{color:var(--muted);font-size:.9rem;margin-top:4px}
 .statnote{font-size:.85rem;color:var(--muted);margin-top:14px}
-@media (max-width:520px){.card{padding:16px}.prompt{font-size:1.05rem}.big{font-size:2.4rem}.hint{display:none}}
+/* stats */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:8px 0 6px}
+.tile{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fbfcfe}
+.tile .v{font-size:1.6rem;font-weight:800;line-height:1.2}
+.tile .l{font-size:.8rem;color:var(--muted)}
+.chart{width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:12px;background:#fff}
+.hard{list-style:none;padding:0;margin:8px 0;display:flex;flex-direction:column;gap:10px;counter-reset:hq}
+.hard li{border:1px solid var(--line);border-radius:10px;padding:10px 12px 10px 44px;position:relative;counter-increment:hq}
+.hard li::before{content:counter(hq);position:absolute;left:12px;top:10px;width:22px;height:22px;border-radius:6px;background:#fff1f2;color:var(--bad);font-weight:700;font-size:.8rem;display:flex;align-items:center;justify-content:center}
+.hard .q{font-weight:600}
+.hard .m{font-size:.85rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center;margin-top:4px}
+.hard .a{color:var(--ok);font-size:.92rem;margin-top:4px}
+.hard details{margin-top:4px;font-size:.9rem}
+.hard summary{cursor:pointer;color:var(--accent);font-size:.85rem}
+.hard details p{margin:6px 0 0;color:var(--muted)}
+.dots{display:inline-flex;gap:3px;vertical-align:middle}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.dot.y{background:var(--ok)}.dot.n{background:var(--bad)}
+textarea{width:100%;min-height:90px;font:12px/1.4 ui-monospace,monospace;border:1px solid var(--line);border-radius:10px;padding:10px;resize:vertical}
+.panel{border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:12px;background:#fbfcfe}
+.msg{font-size:.9rem;margin-top:8px}
+.msg.ok{color:var(--ok)}.msg.bad{color:var(--bad)}
+@media (max-width:520px){.card{padding:16px}.prompt{font-size:1.05rem}.big{font-size:2.4rem}.hint{display:none}.tile .v{font-size:1.3rem}}
 </style>
 </head>
 <body>
@@ -87,7 +115,8 @@ kbd{font:600 .75rem ui-monospace,monospace;border:1px solid var(--line);border-b
   <p class="count" id="qCount"></p>
   <div class="btns">
     <button class="primary" id="startBtn">Start quiz</button>
-    <button id="weakBtn">Weakest questions</button>
+    <button id="hardBtn">Hardest questions</button>
+    <button id="statsBtn">My Stats</button>
   </div>
   <div class="statnote" id="statNote"></div>
 </section>
@@ -96,7 +125,7 @@ kbd{font:600 .75rem ui-monospace,monospace;border:1px solid var(--line);border-b
 <section id="quiz" class="card hidden">
   <div class="topbar"><span id="qPos"></span><span id="scoreLive"></span></div>
   <div class="progress"><div id="progBar"></div></div>
-  <span class="tag" id="qTag"></span>
+  <div id="qTags"></div>
   <p class="prompt" id="qPrompt"></p>
   <div class="opts" id="qOpts"></div>
   <div class="feedback hidden" id="qFeedback"></div>
@@ -117,6 +146,43 @@ kbd{font:600 .75rem ui-monospace,monospace;border:1px solid var(--line);border-b
   <div class="btns">
     <button class="primary" id="retryBtn">Retry missed only</button>
     <button id="restartBtn">Restart</button>
+    <button id="endStatsBtn">My Stats</button>
+  </div>
+</section>
+
+<!-- STATS -->
+<section id="stats" class="card hidden">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+    <h2 style="margin:0">My Stats</h2>
+    <button id="statsBack">← Back</button>
+  </div>
+  <div class="tiles" id="tiles"></div>
+  <h3>Accuracy by chapter</h3>
+  <table class="breakdown" id="statChap"></table>
+  <h3>Session scores</h3>
+  <div id="chartWrap"></div>
+  <h3>Hardest questions</h3>
+  <div class="muted" style="font-size:.85rem">Ranked by difficulty (recent results weigh more than lifetime accuracy). Mastered = 3 correct in a row.</div>
+  <ol class="hard" id="hardList"></ol>
+  <h3>Backup &amp; sync</h3>
+  <div class="muted" style="font-size:.85rem">Progress is saved automatically in this browser. Use export/import to back up or move it to another device.</div>
+  <div class="btns" style="margin-top:10px">
+    <button id="exportBtn">Export progress</button>
+    <button id="importBtn">Import progress</button>
+    <button class="danger" id="resetBtn">Reset stats</button>
+  </div>
+  <div class="panel hidden" id="exportPanel">
+    <b>Your progress code</b> <span class="muted" style="font-size:.85rem">— copy it, then paste it into “Import progress” on another device.</span>
+    <textarea id="exportCode" readonly></textarea>
+    <div class="btns" style="margin-top:8px"><button id="copyBtn">Copy code</button><button id="downloadBtn">Download .json</button></div>
+    <div class="msg" id="exportMsg"></div>
+  </div>
+  <div class="panel hidden" id="importPanel">
+    <b>Import progress</b>
+    <textarea id="importCode" placeholder="Paste a progress code (or JSON) here…"></textarea>
+    <div style="margin:8px 0"><label class="muted" style="font-size:.9rem">…or choose a file: <input type="file" id="importFile" accept=".json,application/json,text/plain"></label></div>
+    <div class="btns"><button class="primary" id="importMerge">Merge with my progress</button><button id="importReplace">Replace my progress</button></div>
+    <div class="msg" id="importMsg"></div>
   </div>
 </section>
 </div>
@@ -177,23 +243,98 @@ kbd{font:600 .75rem ui-monospace,monospace;border:1px solid var(--line);border-b
 (function(){
 "use strict";
 var QUESTIONS = JSON.parse(document.getElementById('quiz-data').textContent);
+var QBYID = {}; QUESTIONS.forEach(function(q){QBYID[q.id]=q;});
 var CHAPTERS = {1:"Limits, Alternatives, Choices",2:"Market System & Circular Flow",3:"Demand, Supply & Equilibrium",6:"Elasticity"};
 var LETTERS = ["A","B","C","D"];
-var STORE_KEY = "econ202_quiz_stats_v1";
+var KEY_V1 = "econ202_quiz_stats_v1";   // legacy: {id:{seen,missed}}
+var KEY = "econ202_progress";            // current: versioned object
+var SCHEMA = 2, HISTORY_N = 10, MASTERY_STREAK = 3, DRILL_SIZE = 15;
 var $ = function(id){return document.getElementById(id);};
 
-/* ---- storage ---- */
-function loadStats(){try{return JSON.parse(localStorage.getItem(STORE_KEY))||{};}catch(e){return {};}}
-function saveStats(s){try{localStorage.setItem(STORE_KEY,JSON.stringify(s));}catch(e){}}
-var stats = loadStats();
+/* ================= storage / schema ================= */
+function blank(){return {version:SCHEMA,createdAt:Date.now(),questions:{},sessions:[],mergedExports:[]};}
+function blankQ(){return {attempts:0,correct:0,history:[],streak:0,lastSeen:null};}
+function fromV1(old){
+  var d=blank(); d.migratedFromV1=Date.now();
+  Object.keys(old||{}).forEach(function(id){
+    var o=old[id]; if(!o||typeof o.seen!=="number") return;
+    var q=blankQ(); q.attempts=o.seen; q.correct=Math.max(0,o.seen-(o.missed||0)); d.questions[id]=q;
+  });
+  return d;
+}
+function normalize(d){
+  // accept v1 objects or v2 objects; returns a valid v2 object or null
+  if(!d||typeof d!=="object") return null;
+  if(d.version===undefined){ // looks like v1?
+    var ks=Object.keys(d); if(ks.length&&ks.every(function(k){return d[k]&&typeof d[k].seen==="number";})) return fromV1(d);
+    if(!ks.length) return blank();
+    return null;
+  }
+  if(typeof d.version!=="number"||d.version>SCHEMA) return null;
+  var out=blank(); out.createdAt=d.createdAt||Date.now();
+  if(d.migratedFromV1) out.migratedFromV1=d.migratedFromV1;
+  out.mergedExports=Array.isArray(d.mergedExports)?d.mergedExports.slice(-50):[];
+  Object.keys(d.questions||{}).forEach(function(id){
+    var s=d.questions[id]||{}, q=blankQ();
+    q.attempts=+s.attempts||0; q.correct=Math.min(q.attempts,+s.correct||0);
+    q.history=(Array.isArray(s.history)?s.history:[]).filter(function(h){return h&&typeof h.t==="number";}).map(function(h){return {t:h.t,ok:!!h.ok};}).sort(function(a,b){return a.t-b.t;}).slice(-HISTORY_N);
+    q.streak=+s.streak||0; q.lastSeen=s.lastSeen||null;
+    out.questions[id]=q;
+  });
+  out.sessions=(Array.isArray(d.sessions)?d.sessions:[]).filter(function(s){return s&&s.id&&s.answered>0;});
+  return out;
+}
+function load(){
+  var d=null;
+  try{ var raw=localStorage.getItem(KEY); if(raw) d=normalize(JSON.parse(raw)); }catch(e){}
+  if(!d){
+    try{ var old=localStorage.getItem(KEY_V1); if(old){ d=fromV1(JSON.parse(old)); } }catch(e){}
+  }
+  d=d||blank(); persist(d); return d;
+}
+var storageOK=true;
+function persist(d){try{localStorage.setItem(KEY,JSON.stringify(d||DATA));storageOK=true;}catch(e){storageOK=false;}}
+var DATA = load();
 
+/* ================= difficulty / mastery ================= */
+function qs(id){return DATA.questions[id];}
+function isMastered(id){var s=qs(id);return !!s&&s.streak>=MASTERY_STREAK;}
+function accuracy(id){var s=qs(id);return s&&s.attempts?s.correct/s.attempts:null;}
+// 0 (easy) .. 1 (hard); unseen = 0.5 neutral.
+// lifetime accuracy is smoothed toward 50% (Laplace); recent history is exponentially weighted (newest weight 1, x0.7 per step back).
+function difficulty(id){
+  var s=qs(id); if(!s||!s.attempts) return 0.5;
+  var life=(s.correct+1)/(s.attempts+2);
+  var recent=life, h=s.history;
+  if(h.length){var w=1,sw=0,sa=0;for(var i=h.length-1;i>=0;i--){sw+=w;sa+=w*(h[i].ok?1:0);w*=0.7;}recent=sa/sw;}
+  var acc=h.length?0.35*life+0.65*recent:life;
+  return Math.round((1-acc)*1000)/1000;
+}
+function recordAnswer(id,ok){
+  var s=qs(id)||(DATA.questions[id]=blankQ()), t=Date.now();
+  s.attempts++; if(ok) s.correct++;
+  s.history.push({t:t,ok:ok}); if(s.history.length>HISTORY_N) s.history=s.history.slice(-HISTORY_N);
+  s.streak=ok?s.streak+1:0; s.lastSeen=t;
+  // session log (created lazily on first answer, updated on every answer)
+  var sess=S.session;
+  if(!sess.logged){ DATA.sessions.push(sess.rec); sess.logged=true; }
+  var r=sess.rec, ch=String(QBYID[id].chapter);
+  r.answered++; if(ok) r.correct++; r.end=t;
+  r.score=Math.round(r.correct/r.answered*100);
+  r.byChapter[ch]=r.byChapter[ch]||{correct:0,answered:0};
+  r.byChapter[ch].answered++; if(ok) r.byChapter[ch].correct++;
+  persist();
+}
+
+/* ================= helpers ================= */
 function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+function dayKey(t){var d=new Date(t);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function fmtDate(t){return new Date(t).toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});}
+function show(id){['start','quiz','end','stats'].forEach(function(s){$(s).classList.toggle('hidden',s!==id);});window.scrollTo(0,0);}
 
-/* ---- state ---- */
-var S = {deck:[],idx:0,score:0,answered:false,results:[]};
-
-/* ---- start screen ---- */
+/* ================= start screen ================= */
+var S = {deck:[],idx:0,score:0,answered:false,results:[],mode:"standard",session:null};
 function buildChips(){
   var html="";
   Object.keys(CHAPTERS).forEach(function(ch){
@@ -205,42 +346,51 @@ function buildChips(){
 }
 function selectedChapters(){return Array.prototype.filter.call(document.querySelectorAll('.chapBox'),function(b){return b.checked;}).map(function(b){return +b.value;});}
 function pool(){var ch=selectedChapters();return QUESTIONS.filter(function(q){return ch.indexOf(q.chapter)>=0;});}
-function weakPool(){
-  return pool().filter(function(q){return stats[q.id]&&stats[q.id].missed>0;})
-    .sort(function(a,b){var A=stats[a.id],B=stats[b.id];return (B.missed-A.missed)||((B.missed/B.seen)-(A.missed/A.seen));});
+// highest-difficulty unmastered questions first (random tie-break), capped at DRILL_SIZE
+function hardPool(){
+  return shuffle(pool().filter(function(q){return !isMastered(q.id);}))
+    .sort(function(a,b){return difficulty(b.id)-difficulty(a.id);})
+    .slice(0,DRILL_SIZE);
+}
+function totals(){
+  var att=0,cor=0;Object.keys(DATA.questions).forEach(function(k){att+=DATA.questions[k].attempts;cor+=DATA.questions[k].correct;});
+  return {att:att,cor:cor};
 }
 function refreshStart(){
-  var n=pool().length, w=weakPool().length;
+  var n=pool().length, h=hardPool().length;
   $('qCount').textContent=n+" question"+(n===1?"":"s")+" selected";
   $('startBtn').disabled=n===0;
-  $('weakBtn').disabled=w===0;
-  $('weakBtn').textContent=w?("Weakest questions ("+w+")"):"Weakest questions";
-  var seen=0,missed=0;Object.keys(stats).forEach(function(k){seen+=stats[k].seen;missed+=stats[k].missed;});
-  $('statNote').innerHTML=seen?('Lifetime: '+seen+' answers, '+missed+' missed. "Weakest questions" drills your most-missed first. <button class="link" id="resetStats">Reset stats</button>'):'Your misses are saved on this device so you can drill your weakest questions later.';
-  var r=$('resetStats'); if(r) r.onclick=function(){if(confirm('Clear all saved miss statistics?')){stats={};saveStats(stats);refreshStart();}};
+  $('hardBtn').disabled=h===0;
+  $('hardBtn').textContent=h?("Hardest questions ("+h+")"):"Hardest questions (all mastered!)";
+  var t=totals(), m=pool().filter(function(q){return isMastered(q.id);}).length;
+  $('statNote').textContent=(t.att?("Lifetime: "+t.att+" answers · "+Math.round(t.cor/t.att*100)+"% correct · "+m+"/"+n+" selected questions mastered. "):"")+
+    (storageOK?"Progress saves automatically on this device.":"Warning: this browser is blocking local storage, so progress can't be saved.");
 }
-function show(id){['start','quiz','end'].forEach(function(s){$(s).classList.toggle('hidden',s!==id);});window.scrollTo(0,0);}
 
-function begin(list,keepOrder){
+function makeItem(q,shuffleOpts){var o=[0,1,2,3];return {q:q,order:shuffleOpts?shuffle(o):o,again:false};}
+function begin(list,mode){
   if(!list.length) return;
   var shuffleOpts=$('shuffleO').checked;
-  var ordered=(!keepOrder&&$('shuffleQ').checked)?shuffle(list):list.slice();
-  S.deck=ordered.map(function(q){
-    var order=[0,1,2,3]; if(shuffleOpts) order=shuffle(order);
-    return {q:q,order:order};
-  });
-  S.idx=0;S.score=0;S.results=[];
+  var ordered=(mode!=="hardest"&&$('shuffleQ').checked)?shuffle(list):list.slice();
+  S.deck=ordered.map(function(q){return makeItem(q,shuffleOpts);});
+  S.idx=0;S.score=0;S.results=[];S.mode=mode;
+  var chs=[];list.forEach(function(q){if(chs.indexOf(q.chapter)<0)chs.push(q.chapter);});chs.sort();
+  S.session={logged:false,rec:{id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),start:Date.now(),end:null,mode:mode,chapters:chs,answered:0,correct:0,score:0,byChapter:{}}};
   show('quiz');renderQ();
 }
 
-/* ---- quiz ---- */
+/* ================= quiz ================= */
+function posText(){$('qPos').textContent="Question "+(S.idx+1)+" of "+S.deck.length+(S.mode==="hardest"?" · Hardest drill":S.mode==="retry"?" · Retry missed":"");}
 function renderQ(){
   var item=S.deck[S.idx], q=item.q;
   S.answered=false;
-  $('qPos').textContent="Question "+(S.idx+1)+" of "+S.deck.length;
+  posText();
   $('scoreLive').textContent="Score: "+S.score+" / "+S.results.length;
   $('progBar').style.width=(S.idx/S.deck.length*100)+"%";
-  $('qTag').textContent="Chapter "+q.chapter+" · "+CHAPTERS[q.chapter];
+  var tags='<span class="tag">Chapter '+q.chapter+' · '+CHAPTERS[q.chapter]+'</span>';
+  if(item.again) tags+='<span class="tag again">↻ Try again</span>';
+  else if(isMastered(q.id)) tags+='<span class="tag mast">★ Mastered</span>';
+  $('qTags').innerHTML=tags;
   $('qPrompt').textContent=q.prompt;
   var html="";
   item.order.forEach(function(orig,pos){
@@ -256,19 +406,32 @@ function answer(pos){
   if(S.answered) return;
   S.answered=true;
   var item=S.deck[S.idx], q=item.q, chosen=item.order[pos], ok=chosen===q.answer;
+  var wasMastered=isMastered(q.id);
   var correctPos=item.order.indexOf(q.answer);
   var btns=$('qOpts').children;
   btns[correctPos].classList.add('correct');
   if(!ok) btns[pos].classList.add('wrong');
   $('qOpts').classList.add('locked');
   if(ok) S.score++;
-  S.results.push({q:q,ok:ok,chosen:chosen});
-  var st=stats[q.id]||{seen:0,missed:0}; st.seen++; if(!ok) st.missed++; stats[q.id]=st; saveStats(stats);
+  S.results.push({q:q,ok:ok,chosen:chosen,again:item.again});
+  recordAnswer(q.id,ok);   // saved immediately
+  var meta="";
+  if(!ok && S.mode==="hardest"){
+    // re-queue 3–4 positions later (or at the end) until answered correctly
+    var at=Math.min(S.deck.length,S.idx+1+3+Math.floor(Math.random()*2));
+    var again=makeItem(q,$('shuffleO').checked); again.again=true;
+    S.deck.splice(at,0,again);
+    meta="This question will come back later in this drill.";
+  }
+  if(ok&&!wasMastered&&isMastered(q.id)) meta="★ Mastered — "+MASTERY_STREAK+" correct in a row!";
+  if(!ok&&wasMastered) meta=(meta?meta+" ":"")+"Removed from mastered.";
   var fb=$('qFeedback');
   fb.className="feedback "+(ok?"ok":"bad");
-  fb.innerHTML='<strong>'+(ok?"✓ Correct!":"✗ Incorrect — the answer is "+LETTERS[correctPos]+".")+'</strong>'+esc(q.explanation);
+  fb.innerHTML='<strong>'+(ok?"✓ Correct!":"✗ Incorrect — the answer is "+LETTERS[correctPos]+".")+'</strong>'+esc(q.explanation)+(meta?'<div class="meta">'+esc(meta)+'</div>':'');
+  posText();
   $('scoreLive').textContent="Score: "+S.score+" / "+S.results.length;
   $('progBar').style.width=((S.idx+1)/S.deck.length*100)+"%";
+  $('nextBtn').textContent=S.idx===S.deck.length-1?"See results":"Next";
   $('nextBtn').disabled=false;$('nextBtn').focus({preventScroll:true});
 }
 function next(){
@@ -276,12 +439,17 @@ function next(){
   if(S.idx<S.deck.length-1){S.idx++;renderQ();}else finish();
 }
 
-/* ---- end ---- */
+/* ================= end ================= */
+function missedUnique(){
+  var seen={},out=[];
+  S.results.forEach(function(x){if(!x.ok&&!seen[x.q.id]){seen[x.q.id]=1;out.push(x);}});
+  return out;
+}
 function finish(){
   var total=S.results.length;
   var pct=total?Math.round(S.score/total*100):0;
   $('finalPct').textContent=pct+"%";
-  $('finalRaw').textContent=S.score+" of "+total+" correct";
+  $('finalRaw').textContent=S.score+" of "+total+" answers correct";
   var rows='<tr><th>Chapter</th><th>Score</th><th style="width:40%"></th></tr>';
   Object.keys(CHAPTERS).forEach(function(ch){
     var r=S.results.filter(function(x){return x.q.chapter==ch;}); if(!r.length) return;
@@ -289,27 +457,157 @@ function finish(){
     rows+='<tr><td>Ch '+ch+' · '+esc(CHAPTERS[ch])+'</td><td>'+c+'/'+r.length+' ('+p+'%)</td><td><div class="bar"><div style="width:'+p+'%"></div></div></td></tr>';
   });
   $('chapTable').innerHTML=rows;
-  var missed=S.results.filter(function(x){return !x.ok;});
+  var missed=missedUnique();
   $('missedWrap').classList.toggle('hidden',!missed.length);
   $('missedList').innerHTML=missed.map(function(x){
-    return '<li><div class="q">'+esc(x.q.prompt)+'</div><div class="y">Your answer: '+esc(x.q.options[x.chosen])+'</div><div class="a">✓ '+esc(x.q.options[x.q.answer])+'</div><div class="e">'+esc(x.q.explanation)+'</div></li>';
+    var fixed=S.results.some(function(r){return r.q.id===x.q.id&&r.ok;});
+    return '<li><div class="q">'+esc(x.q.prompt)+'</div><div class="y">Your answer: '+esc(x.q.options[x.chosen])+(fixed?' <span class="muted">(later answered correctly)</span>':'')+'</div><div class="a">✓ '+esc(x.q.options[x.q.answer])+'</div><div class="e">'+esc(x.q.explanation)+'</div></li>';
   }).join("");
   $('retryBtn').disabled=!missed.length;
   $('retryBtn').textContent=missed.length?("Retry missed only ("+missed.length+")"):"Retry missed only";
   show('end');
 }
 
-/* ---- wiring ---- */
-$('startBtn').onclick=function(){begin(pool(),false);};
-$('weakBtn').onclick=function(){begin(weakPool(),true);};
+/* ================= stats screen ================= */
+function studyStreak(){
+  var days={};
+  DATA.sessions.forEach(function(s){days[dayKey(s.start)]=1;if(s.end)days[dayKey(s.end)]=1;});
+  Object.keys(DATA.questions).forEach(function(k){DATA.questions[k].history.forEach(function(h){days[dayKey(h.t)]=1;});});
+  var d=new Date(); d.setHours(12,0,0,0);
+  if(!days[dayKey(d)]) d.setDate(d.getDate()-1);   // streak still alive if you studied yesterday
+  var n=0; while(days[dayKey(d)]){n++;d.setDate(d.getDate()-1);}
+  return n;
+}
+function dotsHTML(h){return '<span class="dots">'+h.map(function(x){return '<span class="dot '+(x.ok?"y":"n")+'" title="'+(x.ok?"Correct":"Missed")+' · '+esc(fmtDate(x.t))+'"></span>';}).join("")+'</span>';}
+function chartSVG(){
+  var ss=DATA.sessions.slice(-30);
+  if(!ss.length) return '<div class="muted" style="font-size:.9rem">No sessions yet — finish a few questions to see your trend.</div>';
+  var W=680,H=220,L=40,R=14,T=14,B=30,iw=W-L-R,ih=H-T-B;
+  var x=function(i){return ss.length===1?L+iw/2:L+i*iw/(ss.length-1);}, y=function(p){return T+ih-(p/100)*ih;};
+  var g='';
+  [0,25,50,75,100].forEach(function(p){g+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y(p)+'" y2="'+y(p)+'" stroke="#eef0f4"/><text x="'+(L-6)+'" y="'+(y(p)+4)+'" font-size="11" text-anchor="end" fill="#9ca3af">'+p+'%</text>';});
+  var pts=ss.map(function(s,i){return x(i).toFixed(1)+","+y(s.score).toFixed(1);});
+  var area='<path d="M'+x(0).toFixed(1)+','+y(0)+' L'+pts.join(' L')+' L'+x(ss.length-1).toFixed(1)+','+y(0)+' Z" fill="#2563eb" opacity=".08"/>';
+  var line='<polyline points="'+pts.join(' ')+'" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linejoin="round"/>';
+  var dots=ss.map(function(s,i){var col=s.score>=80?"#15803d":s.score>=60?"#b45309":"#b91c1c";return '<circle cx="'+x(i).toFixed(1)+'" cy="'+y(s.score).toFixed(1)+'" r="4.5" fill="#fff" stroke="'+col+'" stroke-width="2.5"><title>'+esc(fmtDate(s.start))+' · '+s.mode+' · '+s.correct+'/'+s.answered+' ('+s.score+'%)</title></circle>';}).join("");
+  var lbl='<text x="'+L+'" y="'+(H-8)+'" font-size="11" fill="#9ca3af">'+esc(new Date(ss[0].start).toLocaleDateString([], {month:"short",day:"numeric"}))+'</text><text x="'+(W-R)+'" y="'+(H-8)+'" font-size="11" text-anchor="end" fill="#9ca3af">'+esc(new Date(ss[ss.length-1].start).toLocaleDateString([], {month:"short",day:"numeric"}))+' · last '+ss.length+' session'+(ss.length>1?'s':'')+'</text>';
+  return '<svg class="chart" id="sessionChart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Session scores over time">'+g+area+line+dots+lbl+'</svg>';
+}
+function renderStats(){
+  var t=totals(), mastered=QUESTIONS.filter(function(q){return isMastered(q.id);}).length;
+  var tiles=[[t.att,"Questions answered"],[t.att?Math.round(t.cor/t.att*100)+"%":"—","Overall accuracy"],[DATA.sessions.length,"Sessions"],[studyStreak()+" 🔥","Study streak (days)"],[mastered+"/"+QUESTIONS.length,"Mastered"]];
+  $('tiles').innerHTML=tiles.map(function(x){return '<div class="tile"><div class="v">'+x[0]+'</div><div class="l">'+x[1]+'</div></div>';}).join("");
+  var rows='<tr><th>Chapter</th><th>Accuracy</th><th>Mastered</th><th style="width:30%"></th></tr>';
+  Object.keys(CHAPTERS).forEach(function(ch){
+    var qsIn=QUESTIONS.filter(function(q){return q.chapter==ch;}),a=0,c=0,m=0;
+    qsIn.forEach(function(q){var s=qs(q.id);if(s){a+=s.attempts;c+=s.correct;}if(isMastered(q.id))m++;});
+    var p=a?Math.round(c/a*100):0;
+    rows+='<tr><td>Ch '+ch+' · '+esc(CHAPTERS[ch])+'</td><td>'+(a?p+'% <span class="muted">('+c+'/'+a+')</span>':'<span class="muted">—</span>')+'</td><td>'+m+'/'+qsIn.length+'</td><td><div class="bar"><div style="width:'+p+'%"></div></div></td></tr>';
+  });
+  $('statChap').innerHTML=rows;
+  $('chartWrap').innerHTML=chartSVG();
+  var ranked=QUESTIONS.filter(function(q){var s=qs(q.id);return s&&s.attempts>0;})
+    .sort(function(a,b){return (difficulty(b.id)-difficulty(a.id))||(qs(b.id).attempts-qs(a.id).attempts);}).slice(0,15);
+  $('hardList').innerHTML=ranked.length?ranked.map(function(q){
+    var s=qs(q.id),acc=Math.round(s.correct/s.attempts*100);
+    return '<li data-qid="'+q.id+'"><div class="q">'+esc(q.prompt)+'</div><div class="m"><span>Ch '+q.chapter+'</span><span><b>'+acc+'%</b> accuracy</span><span>'+s.attempts+' attempt'+(s.attempts>1?'s':'')+'</span>'+(s.history.length?dotsHTML(s.history):'<span>no recent history</span>')+(isMastered(q.id)?'<span class="tag mast" style="margin:0">★ Mastered</span>':'')+'</div><div class="a">✓ '+esc(q.options[q.answer])+'</div><details><summary>Explanation</summary><p>'+esc(q.explanation)+'</p></details></li>';
+  }).join(""):'<li style="padding-left:12px" class="muted">No answers recorded yet.</li>';
+  if(!ranked.length) $('hardList').style.counterReset="none";
+  $('exportPanel').classList.add('hidden');$('importPanel').classList.add('hidden');
+}
+function openStats(){renderStats();show('stats');}
+
+/* ================= export / import ================= */
+function toB64(str){var bytes=new TextEncoder().encode(str),bin="";for(var i=0;i<bytes.length;i+=0x8000)bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000));return btoa(bin);}
+function fromB64(b64){var bin=atob(b64),bytes=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);return new TextDecoder().decode(bytes);}
+function exportPayload(){var d=JSON.parse(JSON.stringify(DATA));d.exportId=Date.now().toString(36)+Math.random().toString(36).slice(2,8);d.exportedAt=Date.now();d.app="econ202-quiz";return d;}
+function parseImport(text){
+  text=(text||"").trim(); if(!text) throw new Error("Paste a code or choose a file first.");
+  var obj;
+  if(text.charAt(0)==="{") obj=JSON.parse(text);
+  else { text=text.replace(/^ECON202:/,"").replace(/\s+/g,""); obj=JSON.parse(fromB64(text)); }
+  var d=normalize(obj); if(!d) throw new Error("That doesn't look like ECON 202 quiz progress.");
+  d.exportId=obj.exportId||null; return d;
+}
+function mergeData(a,b){
+  var out=normalize(JSON.parse(JSON.stringify(a)));
+  Object.keys(b.questions).forEach(function(id){
+    var x=out.questions[id]||blankQ(), y=b.questions[id], seen={};
+    var hist=x.history.concat(y.history).filter(function(h){var k=h.t+":"+h.ok;if(seen[k])return false;seen[k]=1;return true;}).sort(function(p,q){return p.t-q.t;});
+    var run=0;for(var i=hist.length-1;i>=0&&hist[i].ok;i--)run++;
+    var m=blankQ();
+    m.attempts=x.attempts+y.attempts; m.correct=x.correct+y.correct;
+    m.history=hist.slice(-HISTORY_N);
+    // streak: from the combined timeline; if the run covers all known history, keep the longer stored streak
+    m.streak=hist.length?(run===hist.length?Math.max(run,x.streak,y.streak):run):Math.max(x.streak,y.streak);
+    m.lastSeen=Math.max(x.lastSeen||0,y.lastSeen||0)||null;
+    out.questions[id]=m;
+  });
+  var ids={};out.sessions.forEach(function(s){ids[s.id]=1;});
+  b.sessions.forEach(function(s){if(!ids[s.id])out.sessions.push(s);});
+  out.sessions.sort(function(p,q){return p.start-q.start;});
+  out.createdAt=Math.min(a.createdAt||Date.now(),b.createdAt||Date.now());
+  return out;
+}
+function importMsg(t,ok){$('importMsg').textContent=t;$('importMsg').className="msg "+(ok?"ok":"bad");}
+function doImport(mode){
+  var d;
+  try{d=parseImport($('importCode').value);}catch(e){importMsg("Couldn't read that code: "+e.message,false);return;}
+  if(mode==="merge"){
+    if(d.exportId&&DATA.mergedExports.indexOf(d.exportId)>=0&&!confirm("You've already merged this exact backup. Merging again will double-count its attempts. Continue?")) return;
+    var keep=DATA.mergedExports.slice(); DATA=mergeData(DATA,d); DATA.mergedExports=keep; if(d.exportId) DATA.mergedExports.push(d.exportId);
+  }else{
+    if(!confirm("Replace ALL progress on this device with the imported progress? This can't be undone.")) return;
+    var ex=d.exportId; delete d.exportId; DATA=d; DATA.mergedExports=ex?[ex]:[];
+  }
+  persist(); renderStats(); $('importPanel').classList.remove('hidden');
+  var t=totals(); importMsg((mode==="merge"?"Merged":"Replaced")+" ✓ — now "+t.att+" answers across "+DATA.sessions.length+" sessions.",true);
+  $('importCode').value="";
+}
+
+/* ================= wiring ================= */
+$('startBtn').onclick=function(){begin(pool(),"standard");};
+$('hardBtn').onclick=function(){begin(hardPool(),"hardest");};
+$('statsBtn').onclick=openStats;
+$('endStatsBtn').onclick=openStats;
+$('statsBack').onclick=function(){show('start');refreshStart();};
 $('nextBtn').onclick=next;
 $('quitBtn').onclick=function(){if(!S.results.length){show('start');refreshStart();}else finish();};
-$('retryBtn').onclick=function(){begin(S.results.filter(function(x){return !x.ok;}).map(function(x){return x.q;}),false);};
+$('retryBtn').onclick=function(){begin(missedUnique().map(function(x){return x.q;}),"retry");};
 $('restartBtn').onclick=function(){show('start');refreshStart();};
+$('exportBtn').onclick=function(){
+  $('importPanel').classList.add('hidden');
+  $('exportCode').value="ECON202:"+toB64(JSON.stringify(exportPayload()));
+  $('exportMsg').textContent="";$('exportPanel').classList.remove('hidden');$('exportCode').select();
+};
+$('copyBtn').onclick=function(){
+  var ta=$('exportCode');ta.select();
+  var done=function(){$('exportMsg').textContent="Copied to clipboard ✓";$('exportMsg').className="msg ok";};
+  if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(ta.value).then(done,function(){document.execCommand('copy');done();});}
+  else{try{document.execCommand('copy');done();}catch(e){$('exportMsg').textContent="Select the code and copy it manually.";}}
+};
+$('downloadBtn').onclick=function(){
+  var blob=new Blob([JSON.stringify(exportPayload(),null,1)],{type:"application/json"});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download="econ202-progress-"+dayKey(Date.now())+".json";
+  document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},1000);
+};
+$('importBtn').onclick=function(){$('exportPanel').classList.add('hidden');$('importPanel').classList.remove('hidden');$('importMsg').textContent="";};
+$('importFile').onchange=function(e){
+  var f=e.target.files[0]; if(!f) return;
+  var r=new FileReader(); r.onload=function(){$('importCode').value=r.result;importMsg("Loaded "+f.name+" — choose Merge or Replace.",true);}; r.readAsText(f);
+  e.target.value="";
+};
+$('importMerge').onclick=function(){doImport("merge");};
+$('importReplace').onclick=function(){doImport("replace");};
+$('resetBtn').onclick=function(){
+  if(!confirm("Reset ALL saved progress (attempts, history, sessions, mastery)? Consider exporting a backup first. This can't be undone.")) return;
+  DATA=blank(); persist(); try{localStorage.removeItem(KEY_V1);}catch(e){} renderStats();
+};
 
 document.addEventListener('keydown',function(e){
   if(e.ctrlKey||e.metaKey||e.altKey) return;
   if($('quiz').classList.contains('hidden')) return;
+  var tg=e.target&&e.target.tagName; if(tg==="TEXTAREA"||tg==="INPUT") return;
   var k=e.key;
   var map={"1":0,"2":1,"3":2,"4":3,"a":0,"b":1,"c":2,"d":3};
   var p=map[k.toLowerCase()];
@@ -318,7 +616,7 @@ document.addEventListener('keydown',function(e){
   else if(k===" "||k==="Enter") e.preventDefault();
 });
 
-window.__econQuiz={questions:QUESTIONS,state:S};
+window.__econQuiz={questions:QUESTIONS,state:S,data:function(){return DATA;},difficulty:difficulty,isMastered:isMastered,hardPool:hardPool,KEY:KEY,KEY_V1:KEY_V1};
 buildChips();refreshStart();
 })();
 </script>
